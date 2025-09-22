@@ -1,16 +1,40 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import './App.css';
+import PageNotFound from './pages/PageNotFound';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import Store from './pages/Store';
+import Category from './pages/Category';
+import Product from './pages/Product';
+import Layout from './Layout';
+import ProductProvider from './ProductProvider';
+import AdminPage from './pages/AdminPage';
+import AdminSignupPage from './pages/AdminSignupPage';
+import AdminLoginPage from './pages/AdminLoginPage';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-    <p>Ghufran Online Store Home</p>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/store" element={<Store />} />
+          <Route path="/store/:category" element={<Category />} />
+          <Route
+            path="/store/:category/:itemStockNo"
+            element={
+              <ProductProvider>
+                <Product />
+              </ProductProvider>
+            }
+          />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/signup" element={<AdminSignupPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/*" element={<PageNotFound />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
