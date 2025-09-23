@@ -55,24 +55,61 @@ function Header() {
     const [searchResults, setSearchResults] = useState([]);
     const [search, setSearch] = useState("");
     const [watchlist, setWatchlist] = useState([]);
+
+    
+    const stored = localStorage.getItem('watchlist');
+    const currentWatchList = stored ? JSON.parse(stored) : [];
+    const [watchlistIdentifiers, setWatchlistIdentifiers] = useState(currentWatchList);
+
+    
+    const storedFav = localStorage.getItem('favorites');
+    const currentFavs = storedFav ? JSON.parse(storedFav) : [];  
+    const [favoritesIdentifiers, setFavoritestIdentifiers] = useState(currentFavs);
     const [favorites, setFavorites] = useState([]);
 
 
-    useEffect(() => {
-        const storedWatchlistItemsStockNumbers = JSON.parse(localStorage.getItem('watchlist')) || ['STK476591134199'];
-        const mywatchlist = items?.filter(item => storedWatchlistItemsStockNumbers.includes(item.store_no));
+useEffect(() => {
+  const refreshLists = () => {
+    const storedWatchlistIds =
+      JSON.parse(localStorage.getItem('watchlist')) || ['STK476591134199'];
+    const mywatchlist = items?.filter(item =>
+      storedWatchlistIds.includes(item.store_no)
+    );
+    setWatchlist(mywatchlist || []);
 
-        setWatchlist(mywatchlist || []);
+    const storedFavoriteIds =
+      JSON.parse(localStorage.getItem('favorites')) || [
+        'STK645723076665',
+        'STK476591134199'
+      ];
+    const favoritesList = items?.filter(item =>
+      storedFavoriteIds.includes(item.store_no)
+    );
+    setFavorites(favoritesList || []);
+  };
+
+  refreshLists();
+
+  // ✅ 3. Same-tab changes (custom event) + cross-tab changes (native storage)
+  const handleStorage = (e) => {
+    // If it's the native storage event but not one of our keys, ignore
+    if (e.type === 'storage' && e.key && !['watchlist', 'favorites'].includes(e.key)) return;
+    refreshLists();
+  };
+
+  window.addEventListener('watchlist-updated', handleStorage);
+  window.addEventListener('favorites-updated', handleStorage); // optional if you dispatch this too
+  window.addEventListener('storage', handleStorage);
+
+  // ✅ 4. Clean up
+  return () => {
+    window.removeEventListener('watchlist-updated', handleStorage);
+    window.removeEventListener('favorites-updated', handleStorage);
+    window.removeEventListener('storage', handleStorage);
+  };
+}, [items]);
 
 
-        const storedFavoriteItemsStockNumbers = JSON.parse(localStorage.getItem('favorites')) || ['STK645723076665', 'STK476591134199'];
-        const favorites = items?.filter(item =>
-            storedFavoriteItemsStockNumbers.includes(item.store_no)
-          );
-
-        setFavorites(favorites);
-    }, [items, localStorage.getItem('watchlist'), localStorage.getItem('favorites')]);
-    
 
   useEffect(() => {
     if (items) {
@@ -115,7 +152,6 @@ function Header() {
 
 
 
-
 const DrawerList = (
     <Box sx={{ width: 500 }} role="presentation">
       <List className='p-0'>
@@ -136,8 +172,8 @@ const DrawerList = (
                     <div className='d-flex pt-2 small'>{item.stock && <span className='text-light rounded-3 p-1 px-3 small' style={{backgroundColor: 'green'}}>In stock &nbsp; <i className='bi bi-check-circle'></i></span>}</div>
                     <div className='d-flex gap-2 align-items-center'>
                         <button className='text-light w-100 rounded-3 p-1 px-3 bg-danger border-0 small'>Remove</button>
-                        <IconButton className='position-relative rounded-pill' aria-label='favorites'>
-                            <i className='bi bi-heart' style={{ lineHeight: '0' }}></i>
+                        <IconButton onClick={()=> handleAddFavorite(item.store_no)} className='position-relative rounded-pill' aria-label='favorites'>
+                            <i className={`bi ${favoritesIdentifiers?.includes(item?.store_no) ? 'bi-heart-fill' : 'bi-heart'} small`} style={{ lineHeight: '0', color: favoritesIdentifiers.includes(item?.store_no) ? 'red' : '' }}></i>
                         </IconButton>
                     </div>
                 </div>
@@ -169,8 +205,8 @@ const FavoritesDrawerList = (
                     <div className='d-flex pt-2 small'>{item.stock && <span className='text-light rounded-3 p-1 px-3 small' style={{backgroundColor: 'green'}}>In stock &nbsp; <i className='bi bi-check-circle'></i></span>}</div>
                     <div className='d-flex gap-2 align-items-center'>
                         <button className='text-light w-100 rounded-3 p-1 px-3 bg-danger border-0 small'>Remove</button>
-                        <IconButton className='position-relative rounded-pill' aria-label='favorites'>
-                            <i className='bi bi-eye' style={{ lineHeight: '0' }}></i>
+                        <IconButton onClick={()=> handleAddWatchlist(item.store_no)} className='position-relative rounded-pill' aria-label='favorites'>
+                            <i className={`bi ${watchlistIdentifiers?.includes(item?.store_no) ? 'bi-eye-fill' : 'bi-eye'} small`} style={{ lineHeight: '0', color: watchlistIdentifiers.includes(item?.store_no) ? 'var(--primary-color)' : '' }}></i>
                         </IconButton>
                     </div>
                 </div>
@@ -247,6 +283,44 @@ const menuDrawerList = (
     </Box>
   );
 
+
+
+
+   
+const handleAddWatchlist = (store_no) => {
+  const stored = localStorage.getItem('watchlist');
+  const current = stored ? JSON.parse(stored) : [];
+
+  let updated;
+  if (!current.includes(store_no)) {
+    updated = [...current, store_no];
+  } else {
+    updated = current.filter(no => no !== store_no);
+  }
+
+  setWatchlistIdentifiers(updated)
+  localStorage.setItem('watchlist', JSON.stringify(updated));
+
+  window.dispatchEvent(new Event('watchlist-updated'));
+};
+
+
+const handleAddFavorite = (store_no) => {
+  const stored = localStorage.getItem('favorites');
+  const current = stored ? JSON.parse(stored) : [];
+
+  let updated;
+  if (!current.includes(store_no)) {
+    updated = [...current, store_no];
+  } else {
+    updated = current.filter(no => no !== store_no);
+  }
+
+  setFavoritestIdentifiers(updated)
+  localStorage.setItem('favorites', JSON.stringify(updated));
+
+  window.dispatchEvent(new Event('favorites-updated'));
+};
 
 
   return (
@@ -344,11 +418,11 @@ const menuDrawerList = (
 
           <ul className="list-unstyled mb-0 gap-3 d-none d-md-flex">
             <li><Link to="/store">Store</Link></li>
-            <li><Link to="/store/all-categories">All Categories</Link></li>
+            <li><Link to="/store/All Categories">All Categories</Link></li>
             {
               topCategories?.map((category) => (
                 <li key={category}>
-                  <Link to={`/store/${category.toLowerCase().replace(/\s+/g, '-')}`}>{category.charAt(0).toUpperCase() + category.slice(1)}</Link>
+                  <Link to={`/store/${category}`}>{category.charAt(0).toUpperCase() + category.slice(1)}</Link>
                 </li>
               ))
             }

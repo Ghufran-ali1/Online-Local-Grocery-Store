@@ -67,7 +67,6 @@ function Footer() {
               alert('Please fill in all fields.');
                return 0;
             };
-            console.log('Summary: ', (e.target[0].value), (e.target[1].value));
             e.target.reset();
             alert('Enquiry sent successfully!');
           }}>

@@ -78,3 +78,11 @@ footer textarea.form-control {
 .carousel-next {
   right: -15px;
 }
+
+.link:hover {
+  color: var(--primary-color) !important;
+}
+.productItem:hover {
+  border: 1px solid var(--primary-color) !important;
+  transition: 0.3s ease-in-out;
+}

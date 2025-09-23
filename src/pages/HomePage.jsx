@@ -1,8 +1,7 @@
 import React from 'react'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
 import { ChevronRight } from '@mui/icons-material'
 import CategoriesTab from '../components/CategoriesTab'
+import ProductPicks from '../components/ProductPicks'
 
 function HomePage() {
   return (
@@ -33,9 +32,23 @@ function HomePage() {
         <img className='img-fluid' src="/media/wide-banner.png" alt="banner" />
       </div>
 
-      <h4 className='container mt-5 fw-bold'>Shop by Category</h4>
+      <h4 className='container mt-5 fw-bold'>Trending Today</h4>
+      <ProductPicks Trending={true} />
 
+      <h4 className='container mt-5 fw-bold'>Top Categories</h4>
       <CategoriesTab isTopCategories={[true]} />
+
+
+      <h4 className='container mt-5 fw-bold'>Top Picks</h4>
+      <ProductPicks Top={true} />
+
+
+      <h4 className='container mt-5 fw-bold'>New Arrivals 🔥</h4>
+      <ProductPicks New={true} />
+
+
+      <h4 className='container mt-5 fw-bold'>Fresh from the Farm 🔥</h4>
+      <ProductPicks Fresh={true} />
     </div>
   )
 }

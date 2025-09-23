@@ -10,6 +10,7 @@ import ProductProvider from './ProductProvider';
 import AdminPage from './pages/AdminPage';
 import AdminSignupPage from './pages/AdminSignupPage';
 import AdminLoginPage from './pages/AdminLoginPage';
+import { AdminContext } from './AdminContext';
 
 function App() {
   return (
@@ -27,9 +28,21 @@ function App() {
               </ProductProvider>
             }
           />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/signup" element={<AdminSignupPage />} />
-          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={
+            <AdminContext>
+              <AdminPage />
+            </AdminContext>
+          } />
+          <Route path="/admin/signup" element={
+            <AdminContext>
+              <AdminSignupPage />
+            </AdminContext>
+          } />
+          <Route path="/admin/login" element={
+            <AdminContext>
+              <AdminLoginPage />
+            </AdminContext>
+          } />
           <Route path="/*" element={<PageNotFound />} />
         </Route>
       </Routes>
