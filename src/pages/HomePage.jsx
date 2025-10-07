@@ -112,7 +112,7 @@ function HomePage() {
             backgroundRepeat: "no-repeat", // no tiling
             backgroundSize: "cover", // keep the whole image visible
             backgroundPosition: "right center", // lock it to the right
-            minHeight: "80vh",
+            minHeight: "90vh",
           }}
         >
           <div className="container px-4 m-auto rounded-0">
@@ -120,7 +120,7 @@ function HomePage() {
               <div className="text-uppercase mb-2">
                 <u> Grocery made convenient </u>
               </div>
-              <h1 className="fw-bold" style={{ fontSize: "4rem" }}>
+              <h1 className="fw-bold homeTitle">
                 Make your{" "}
                 <span style={{ color: "var(--primary-color)" }}>
                   grocery <br /> shopping <u>convenient</u>.

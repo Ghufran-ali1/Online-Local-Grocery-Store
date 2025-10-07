@@ -120,3 +120,13 @@ footer textarea.form-control {
   border: 1px solid var(--primary-color) !important;
 }
   
+
+
+.homeTitle {
+  font-size: 4rem;
+}
+@media (max-width: 768px) {
+  .homeTitle {
+    font-size: 2.2rem;
+  }
+}
