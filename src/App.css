@@ -129,4 +129,11 @@ footer textarea.form-control {
   .homeTitle {
     font-size: 2.2rem;
   }
+  
+.carousel-prev {
+  left: 10px;
+}
+.carousel-next {
+  right: 10px;
+}
 }
