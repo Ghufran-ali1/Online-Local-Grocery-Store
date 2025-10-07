@@ -4,7 +4,7 @@ import ProductPicks from "../components/ProductPicks";
 import ProductItem from "../components/ProductItem";
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
-import CallToAction from "../components/Calltoaction";
+import CallToAction from "../components/CallToAction";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
