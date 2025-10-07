@@ -16,7 +16,7 @@ import ProductItem from "../components/ProductItem";
 import Footer from "../components/Footer";
 import AppBreadcrumbs from "../components/Breadcrumbs";
 import Header from "../components/Header";
-import CallToAction from "../components/Calltoaction";
+import CallToAction from "../components/CallToAction";
 import NewItemCreateCTA from "../components/NewItemCreateCTA";
 
 function Store() {

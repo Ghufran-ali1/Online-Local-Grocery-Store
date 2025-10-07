@@ -6,7 +6,7 @@ import ProductPicks from "../components/ProductPicks";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import AppBreadcrumbs from "../components/Breadcrumbs";
-import CallToAction from "../components/Calltoaction";
+import CallToAction from "../components/CallToAction";
 
 function Product() {
   const { itemStockNo } = useParams();
