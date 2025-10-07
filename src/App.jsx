@@ -5,18 +5,17 @@ import HomePage from './pages/HomePage';
 import Store from './pages/Store';
 import Category from './pages/Category';
 import Product from './pages/Product';
-import Layout from './Layout';
 import ProductProvider from './ProductProvider';
 import AdminPage from './pages/AdminPage';
 import AdminSignupPage from './pages/AdminSignupPage';
 import AdminLoginPage from './pages/AdminLoginPage';
-import { AdminContext } from './AdminContext';
+import { AdminAuthProvider } from './AdminContext';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<Layout />}>
+        <Route>
           <Route path="/" element={<HomePage />} />
           <Route path="/store" element={<Store />} />
           <Route path="/store/:category" element={<Category />} />
@@ -29,19 +28,19 @@ function App() {
             }
           />
           <Route path="/admin" element={
-            <AdminContext>
+            <AdminAuthProvider>
               <AdminPage />
-            </AdminContext>
+            </AdminAuthProvider>
           } />
           <Route path="/admin/signup" element={
-            <AdminContext>
+            <AdminAuthProvider>
               <AdminSignupPage />
-            </AdminContext>
+            </AdminAuthProvider>
           } />
           <Route path="/admin/login" element={
-            <AdminContext>
+            <AdminAuthProvider>
               <AdminLoginPage />
-            </AdminContext>
+            </AdminAuthProvider>
           } />
           <Route path="/*" element={<PageNotFound />} />
         </Route>

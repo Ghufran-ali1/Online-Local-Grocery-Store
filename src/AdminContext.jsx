@@ -1,9 +1,9 @@
+// AdminContext
 import React, { createContext, useState, useEffect, useContext } from 'react';
-
 export const AdminContext = createContext();
 
 export const AdminAuthProvider = ({ children }) => {
-  const [adminDetails, setAdminDetails] = useState(null);
+  const [ adminDetails, setAdminDetails ] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Track loading state
 
   // Function to fetch admin details based on token
@@ -24,7 +24,6 @@ export const AdminAuthProvider = ({ children }) => {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // console.warn('Token expired or invalid. Logging out admin.');
           localStorage.removeItem('admin_auth_token');
           setAdminDetails(null);
         } else {
@@ -32,10 +31,9 @@ export const AdminAuthProvider = ({ children }) => {
         }
       } else {
         const data = await response.json();
-        setAdminDetails(data);
+        setAdminDetails(data.user);
       }
     } catch (err) {
-      // console.error('Error fetching admin details:', err.message);
       setAdminDetails(null);
     } finally {
       setIsLoading(false); // Mark loading as complete
@@ -48,6 +46,7 @@ export const AdminAuthProvider = ({ children }) => {
 
     const initializeAdmin = async () => {
       const token = localStorage.getItem('admin_auth_token');
+      
       if (isMounted) {
         await fetchAdminDetails(token);
       }

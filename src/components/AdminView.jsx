@@ -2,39 +2,14 @@ import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { Avatar, Modal } from "@mui/material";
 
 
-function CategoriesTab({ items, activeTab = null, isTopCategories = false }) {
+function AdminView({ admins }) {
   const containerRef = useRef();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(true);
-  const [allCategories, setAllCategories] = useState([]);
-  const [topCategories, setTopCategories] = useState([
-    "Fruits",
-    "Vegetables",
-    "Snacks",
-    "Beverages",
-    "Meat",
-  ]);
 
-  useEffect(() => {
-    if (items) {
-      const categories = items
-        ?.map((item) => item.category)
-        .reduce((acc, category) => {
-          acc[category] = (acc[category] || 0) + 1;
-          return acc;
-        }, {});
-
-      const sortedCategories = Object.entries(categories)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 7)
-        .map(([name]) => name);
-      setTopCategories(sortedCategories);
-
-      setAllCategories(Object.keys(categories));
-    }
-  }, [items]);
 
   const checkScroll = () => {
     const el = containerRef.current;
@@ -132,71 +107,31 @@ function CategoriesTab({ items, activeTab = null, isTopCategories = false }) {
       )}
       <div
         ref={containerRef}
-        className="position-relative mt-2 mb-3 d-flex gap-4 overflow-auto"
+        className="position-relative mt-2 mb-3 d-flex gap-4 overflow-auto justify-content-center"
         style={{
           scrollSnapType: "x mandatory",
           scrollbarWidth: "none",
           scrollBehavior: "smooth",
         }}
       >
-        <Link
-          to={`/store/All Categories`}
-          key={"all-categories"}
-          className="text-decoration-none item d-flex p-2 flex-column justify-content-start align-items-center"
-          style={{
-            width: "160px",
-            minWidth: "160px",
-            aspectRatio: "1/1",
-            scrollSnapType: "x mandatory",
-            scrollSnapStop: "always",
-            border:
-              activeTab && activeTab === "All Categories"
-                ? "3px solid var(--primary-color)"
-                : "2px solid transparent",
-            borderRadius: "8px",
-            scrollSnapAlign: "start",
-          }}
-        >
-          <img
-            src={`/media/BorderAll.png`}
-            width={"100%"}
-            className="mb-2 object-fit-cover object-position-center p-3"
-            style={{ aspectRatio: "1/1" }}
-          />
-          <div className="3 text-black">All Categories</div>
-        </Link>
-        {(isTopCategories ? topCategories : allCategories || topCategories).map(
-          (category, index) => (
-            <Link
-              to={`/store/${category}`}
-              key={index}
-              className="text-decoration-none item d-flex p-2 flex-column justify-content-start align-items-center"
-              style={{
-                width: "160px",
-                minWidth: "160px",
-                aspectRatio: "1/1",
-                scrollSnapType: "x mandatory",
-                scrollSnapStop: "always",
-                border:
-                  activeTab && activeTab === category
-                    ? "3px solid var(--primary-color)"
-                    : "2px solid transparent",
-                borderRadius: "8px",
-                scrollSnapAlign: "start",
-              }}
-            >
-              <img
-                src={`${
-                  items?.find((item) => item.category === category)?.gallery[0]
-                }`}
-                width={"100%"}
-                className="mb-2 object-fit-cover object-position-center p-2"
-                style={{ aspectRatio: "1/1" }}
-              />
-              <div className="3 text-black">{category}</div>
-            </Link>
-          )
-        ) || <>Getting categories...</>}
+        {admins.map((admin) => (
+          <div
+            key={admin.id}
+            className="Item"
+            style={{
+              scrollSnapAlign: "start",
+              minWidth: "200px",
+              flexShrink: 0,
+            }}
+          >
+            <Avatar className="mb-2 m-auto" alt={admin.name} src={admin.avatar} style={{ width: "100px", height: "100px" }} />
+            <div className="text-center fw-semibold fs-6">{admin.username}</div>
+            <div className="text-center">{admin.email}</div>
+            <div className="text-center small text-muted">
+              <Link to={`#`}>View Details</Link>
+            </div>
+          </div>
+        ))}
       </div>
       {canScrollNext && (
         <button
@@ -210,4 +145,4 @@ function CategoriesTab({ items, activeTab = null, isTopCategories = false }) {
   );
 }
 
-export default CategoriesTab;
+export default AdminView;
