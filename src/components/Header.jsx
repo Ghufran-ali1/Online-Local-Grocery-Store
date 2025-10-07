@@ -175,7 +175,7 @@ function Header() {
   }, [search]);
 
   const DrawerList = (
-    <Box sx={{ width: 500 }} role="presentation">
+    <Box sx={{ width: 450 }} role="presentation">
       <List className="p-0">
         <div
           className="d-flex border-bottom p-3 position-sticky bg-white justify-content-between align-items-center mb-2"
@@ -250,7 +250,7 @@ function Header() {
   );
 
   const FavoritesDrawerList = (
-    <Box sx={{ width: 500 }} role="presentation">
+    <Box sx={{ width: 450 }} role="presentation">
       <List className="p-0">
         <div
           className="d-flex border-bottom p-3 position-sticky bg-white justify-content-between align-items-center mb-2"
