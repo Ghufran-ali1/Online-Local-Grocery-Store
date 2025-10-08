@@ -11,13 +11,10 @@ import {
 import GridViewIcon from "@mui/icons-material/GridView";
 import ViewListIcon from "@mui/icons-material/ViewList";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
-import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ProductItem from "../components/ProductItem";
-import Header from "../components/Header";
 import AppBreadcrumbs from "../components/Breadcrumbs";
-import Footer from "../components/Footer";
 import CallToAction from "../components/CallToAction";
 import NewItemCreateCTA from "../components/NewItemCreateCTA";
 
@@ -36,31 +33,24 @@ function Category() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
 
-
-
-
-
-
-
-  
-    useEffect(() => {
-      try {
-        fetch("https://grocery-store-server-theta.vercel.app/api/items")
-          .then((res) => {
-            if (!res.ok) throw new Error("Network response was not ok");
-            return res.json();
-          })
-          .then((data) => {
-            setItems(data);
-            setLoading(false);
-          })
-          .catch((error) => {
-            setLoading(false);
-          });
-      } catch (error) {
-        setLoading(false);
-      }
-    }, []);
+  useEffect(() => {
+    try {
+      fetch("https://grocery-store-server-theta.vercel.app/api/items")
+        .then((res) => {
+          if (!res.ok) throw new Error("Network response was not ok");
+          return res.json();
+        })
+        .then((data) => {
+          setItems(data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setLoading(false);
+        });
+    } catch (error) {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (items) {
@@ -141,7 +131,6 @@ function Category() {
 
   return (
     <>
-      <Header />
       <AppBreadcrumbs />
       <div className="container m-auto min-vh-100">
         <CategoriesTab items={items} activeTab={category} />
@@ -311,12 +300,79 @@ function Category() {
                 ))}
               </div>
             ) : (
-              <div className="text-center p-5 w-100">
-                {loading ? (
-                  <div>Loading items ...</div>
-                ) : (
-                  <span>Loading items ...</span>
-                )}
+              <div
+                className="d-grid gap-3 justify-content-start"
+                style={{
+                  gridTemplateColumns:
+                    view === "grid" ? `repeat(${columnCount}, 1fr)` : "1fr",
+                }}
+              >
+                {[...Array(12)].map((_, index) => (
+                  <div
+                    key={index}
+                    style={{ zIndex: 1, lineHeight: 1.5 }}
+                    className="text-decoration-none placeholder-glow position-relative mb-3"
+                  >
+                    {/* top right badges */}
+                    <div
+                      className="d-flex gap-2 position-absolute"
+                      style={{ top: "8px", right: "8px", zIndex: 10 }}
+                    >
+                      <div
+                        className="small placeholder col-2 p-1 px-2 border-0 outline-0 rounded-2"
+                        style={{
+                          width: "60px",
+                          height: "20px",
+                        }}
+                      />
+                      <div
+                        className="small placeholder col-2 p-1 px-2 border-0 outline-0 rounded-2"
+                        style={{
+                          width: "65px",
+                          height: "20px",
+                        }}
+                      />
+                    </div>
+
+                    {/* card container */}
+                    <div
+                      className="text-decoration-none item d-flex p-2 pt-3 pb-1 flex-column justify-content-start align-items-start border productItem"
+                      style={{
+                        width: "100%",
+                        aspectRatio: "1/1",
+                        scrollSnapType: "x mandatory",
+                        scrollSnapStop: "always",
+                        borderRadius: "8px",
+                        scrollSnapAlign: "start",
+                      }}
+                    >
+                      {/* image placeholder */}
+                      <div
+                        className="placeholder rounded mb-3 w-100"
+                        style={{
+                          aspectRatio: "3/2.5",
+                          backgroundColor: "rgba(0,0,0,0.08)",
+                        }}
+                      ></div>
+
+                      {/* text placeholders */}
+                      <div className="px-1 m-0 w-100">
+                        <div
+                          className="placeholder col-8 mb-2"
+                          style={{ height: "16px", borderRadius: "4px" }}
+                        ></div>
+                        <div
+                          className="placeholder col-12 mb-1"
+                          style={{ height: "12px", borderRadius: "4px" }}
+                        ></div>
+                        <div
+                          className="placeholder col-6"
+                          style={{ height: "12px", borderRadius: "4px" }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
             {/* <div className='text-center py-4 text-muted'>{allResults?.length || 0} items found in {category}</div> */}
@@ -333,7 +389,6 @@ function Category() {
         </div>
       </div>
       <CallToAction />
-      <Footer />
     </>
   );
 }

@@ -1,11 +1,10 @@
 import React, { useContext, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { AdminContext } from "../AdminContext";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import AppBreadcrumbs from "../components/Breadcrumbs";
 
 function AdminLoginPage() {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -46,7 +45,7 @@ function AdminLoginPage() {
         setLoggingIn(false);
 
         setTimeout(() => {
-          window.location.href = "/admin";
+          navigate("/admin");
         }, 2000);
       } else {
         // Handle login error
@@ -60,7 +59,6 @@ function AdminLoginPage() {
   };
   return (
     <>
-      <Header />
       <AppBreadcrumbs />
       <div className="container m-auto pb-3">
         <div className="border p-3 rounded-3 mb-3">
@@ -148,7 +146,6 @@ function AdminLoginPage() {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

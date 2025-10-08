@@ -176,7 +176,7 @@ function ProductPicks({
     window.dispatchEvent(new Event("favorites-updated"));
   };
 
-  return items ? (
+  return (
     <div className="position-relative p-2 py-3 mb-2 mt-2 container">
       {canScrollPrev && (
         <button
@@ -195,118 +195,201 @@ function ProductPicks({
           scrollBehavior: "smooth",
         }}
       >
-        {!loading ? (
-          PickedItems.map((item, index) => (
-            <Link
-              onClick={() => window.scrollTo(0, 0)}
-              to={`/store/${item.category}/${item.store_no}`}
-              key={index}
-              style={{ zIndex: 1, lineHeight: 1.5 }}
-              className="text-decoration-none position-relative"
-            >
-              <div
-                className="d-flex gap-2 position-absolute"
-                style={{ top: "8px", right: "8px", zIndex: 10 }}
+        {!loading
+          ? PickedItems.map((item, index) => (
+              <Link
+                onClick={() => window.scrollTo(0, 0)}
+                to={`/store/${item.category}/${item.store_no}`}
+                key={index}
+                style={{ zIndex: 1, lineHeight: 1.5 }}
+                className="text-decoration-none position-relative"
               >
-                {item.stock && (
-                  <button
-                    className="small p-1 px-2 border-0 outline-0 rounded-2"
-                    style={{ backgroundColor: "green", color: "white" }}
-                  >
-                    In stock
-                  </button>
-                )}
-                {New && (
-                  <button
-                    className="small p-1 px-2 border-0 outline-0 rounded-2"
-                    style={{ backgroundColor: "#FF8C00", color: "white" }}
-                  >
-                    New 🔥
-                  </button>
-                )}
-              </div>
-              <div
-                className="text-decoration-none item d-flex p-2 pt-3 pb-1 flex-column justify-content-start align-items-start border productItem"
-                style={{
-                  width: "250px",
-                  aspectRatio: "1/1",
-                  scrollSnapType: "x mandatory",
-                  scrollSnapStop: "always",
-                  borderRadius: "8px",
-                  scrollSnapAlign: "start",
-                }}
-              >
-                <img
-                  src={`${item.gallery[0]}`}
-                  width={"100%"}
-                  className="mb-2 object-fit-cover object-position-center p-2"
-                  style={{
-                    aspectRatio: "1/1",
-                    objectFit: "cover",
-                    objectPosition: "center",
-                  }}
-                />
-                <div className="px-1 m-0 w-100">
-                  <div className="fw-semibold m-0 p-0">{item.name}</div>
-                  <small className="doubleLineClamp mt-1" style={{ color: "var(--text-light)" }}>
-                    {item.description}
-                  </small>
+                <div
+                  className="d-flex gap-2 position-absolute"
+                  style={{ top: "8px", right: "8px", zIndex: 10 }}
+                >
+                  {item.stock && (
+                    <button
+                      className="small p-1 px-2 border-0 outline-0 rounded-2"
+                      style={{ backgroundColor: "green", color: "white" }}
+                    >
+                      In stock
+                    </button>
+                  )}
+                  {New && (
+                    <button
+                      className="small p-1 px-2 border-0 outline-0 rounded-2"
+                      style={{ backgroundColor: "#FF8C00", color: "white" }}
+                    >
+                      New 🔥
+                    </button>
+                  )}
                 </div>
                 <div
-                  className="d-flex p-0 small gap-1 justify-content-end w-100"
-                  style={{ zIndex: 10 }}
+                  className="text-decoration-none item d-flex p-2 pt-3 pb-1 flex-column justify-content-start align-items-start border productItem"
+                  style={{
+                    width: "250px",
+                    aspectRatio: "1/1",
+                    scrollSnapType: "x mandatory",
+                    scrollSnapStop: "always",
+                    borderRadius: "8px",
+                    scrollSnapAlign: "start",
+                  }}
                 >
-                  <IconButton
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-
-                      handleAddWatchlist(item.store_no);
+                  <img
+                    src={`${item.gallery[0]}`}
+                    width={"100%"}
+                    className="mb-2 object-fit-cover object-position-center p-2"
+                    style={{
+                      aspectRatio: "1/1",
+                      objectFit: "cover",
+                      objectPosition: "center",
                     }}
+                  />
+                  <div className="px-1 m-0 w-100">
+                    <div className="fw-semibold m-0 p-0">{item.name}</div>
+                    <small
+                      className="doubleLineClamp mt-1"
+                      style={{ color: "var(--text-light)" }}
+                    >
+                      {item.description}
+                    </small>
+                  </div>
+                  <div
+                    className="d-flex p-0 small gap-1 justify-content-end w-100"
+                    style={{ zIndex: 10 }}
                   >
-                    <i
-                      className={`bi ${
-                        allWatchList.includes(item?.store_no)
-                          ? "bi-eye-fill"
-                          : "bi-eye"
-                      } small`}
-                      style={{
-                        lineHeight: "0",
-                        color: allWatchList.includes(item?.store_no)
-                          ? "var(--primary-color)"
-                          : "",
-                      }}
-                    ></i>
-                  </IconButton>
-                  <IconButton
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
+                    <IconButton
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
 
-                      handleAddFavorite(item.store_no);
-                    }}
-                  >
-                    <i
-                      className={`bi ${
-                        allFavorites.includes(item?.store_no)
-                          ? "bi-heart-fill"
-                          : "bi-heart"
-                      } small`}
-                      style={{
-                        lineHeight: "0",
-                        color: allFavorites.includes(item?.store_no)
-                          ? "red"
-                          : "",
+                        handleAddWatchlist(item.store_no);
                       }}
-                    ></i>
-                  </IconButton>
+                    >
+                      <i
+                        className={`bi ${
+                          allWatchList.includes(item?.store_no)
+                            ? "bi-eye-fill"
+                            : "bi-eye"
+                        } small`}
+                        style={{
+                          lineHeight: "0",
+                          color: allWatchList.includes(item?.store_no)
+                            ? "var(--primary-color)"
+                            : "",
+                        }}
+                      ></i>
+                    </IconButton>
+                    <IconButton
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        handleAddFavorite(item.store_no);
+                      }}
+                    >
+                      <i
+                        className={`bi ${
+                          allFavorites.includes(item?.store_no)
+                            ? "bi-heart-fill"
+                            : "bi-heart"
+                        } small`}
+                        style={{
+                          lineHeight: "0",
+                          color: allFavorites.includes(item?.store_no)
+                            ? "red"
+                            : "",
+                        }}
+                      ></i>
+                    </IconButton>
+                  </div>
+                </div>
+              </Link>
+            ))
+          : [...Array(9)].map((_, index) => (
+              <div
+              key={index}
+                style={{ zIndex: 1, lineHeight: 1.5 }}
+                className="text-decoration-none placeholder-glow position-relative"
+              >
+                {/* top right badges */}
+                <div
+                  className="d-flex gap-2 position-absolute"
+                  style={{ top: "8px", right: "8px", zIndex: 10 }}
+                >
+                  <div
+                    className="small placeholder col-2 p-1 px-2 border-0 outline-0 rounded-2"
+                    style={{
+                      width: "60px",
+                      height: "20px",
+                    }}
+                  />
+                  {New && (
+                    <div
+                      className="small placeholder col-2 p-1 px-2 border-0 outline-0 rounded-2"
+                      style={{
+                        width: "65px",
+                        height: "20px",
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* card container */}
+                <div
+                  className="text-decoration-none item d-flex p-2 pt-3 pb-1 flex-column justify-content-start align-items-start border productItem"
+                  style={{
+                    width: "250px",
+                    aspectRatio: "1/1",
+                    scrollSnapType: "x mandatory",
+                    scrollSnapStop: "always",
+                    borderRadius: "8px",
+                    scrollSnapAlign: "start",
+                  }}
+                >
+                  {/* image placeholder */}
+                  <div
+                    className="placeholder rounded mb-3 w-100"
+                    style={{
+                      aspectRatio: "3/2.5",
+                      backgroundColor: "rgba(0,0,0,0.08)",
+                    }}
+                  ></div>
+
+                  {/* text placeholders */}
+                  <div className="px-1 m-0 w-100">
+                    <div
+                      className="placeholder col-8 mb-2"
+                      style={{ height: "16px", borderRadius: "4px" }}
+                    ></div>
+                    <div
+                      className="placeholder col-12 mb-1"
+                      style={{ height: "12px", borderRadius: "4px" }}
+                    ></div>
+                    <div
+                      className="placeholder col-6"
+                      style={{ height: "12px", borderRadius: "4px" }}
+                    ></div>
+                  </div>
+
+                  {/* icon placeholders */}
+                  <div
+                    className="d-flex p-0 small gap-1 justify-content-end w-100 mt-auto"
+                    style={{ zIndex: 10 }}
+                  >
+                    <div
+                      className="placeholder rounded-circle"
+                      style={{ width: "24px", height: "24px" }}
+                    ></div>
+                    <div
+                      className="placeholder rounded-circle"
+                      style={{ width: "24px", height: "24px" }}
+                    ></div>
+                  </div>
                 </div>
               </div>
-            </Link>
-          ))
-        ) : (
-          <div className="text-center w-100 p-3">Loading...</div>
-        )}
+            ))}
       </div>
       {canScrollNext && (
         <button
@@ -317,8 +400,6 @@ function ProductPicks({
         </button>
       )}
     </div>
-  ) : (
-    <div className="container text-center py-4">Loading items ...</div>
   );
 }
 

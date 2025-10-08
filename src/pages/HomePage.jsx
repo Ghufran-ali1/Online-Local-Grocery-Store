@@ -5,32 +5,6 @@ import ProductItem from "../components/ProductItem";
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import CallToAction from "../components/CallToAction";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function HomePage() {
   const [items, setItems] = useState([]);
@@ -42,8 +16,6 @@ function HomePage() {
   const storedFav = localStorage.getItem("favorites");
   const currentFavs = storedFav ? JSON.parse(storedFav) : [];
   const [allFavorites, setAllFavorites] = useState(currentFavs);
-
-
 
   useEffect(() => {
     try {
@@ -63,7 +35,6 @@ function HomePage() {
       setLoading(false);
     }
   }, []);
-
 
   const handleAddWatchlist = (store_no) => {
     const stored = localStorage.getItem("watchlist");
@@ -101,7 +72,6 @@ function HomePage() {
 
   return (
     <>
-      <Header />
       <div>
         <div
           className="text-light d-flex justify-content-center py-5 m-0 p-0"
@@ -134,14 +104,14 @@ function HomePage() {
                 and household items, we have everything you need delivered right
                 to your doorstep.
               </p>
-              <a href="/store">
+              <Link href="/store">
                 <button
                   className="text-light mt-2 p-2 px-5 d-flex justify-content-center rounded-pill border-0 outline-0 align-items-center"
                   style={{ backgroundColor: "var(--primary-color)" }}
                 >
                   Shop Now &nbsp; &nbsp; <ChevronRight />{" "}
                 </button>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -292,24 +262,110 @@ function HomePage() {
               backgroundColor: "var(--background-light)",
             }}
           >
-            {items?.length > 0 ? (
-              items
-                ?.filter(
-                  (i) => i.category === "Fruits" || i.category === "Produce"
-                )
-                .slice(0, 4)
-                .map((item) => (
-                  <Link
-                    key={item?.id}
-                    to={`/store/${item?.category}/${item?.store_no}`}
-                    onClick={() => window.scrollTo(0, 0)}
-                    className="text-decoration-none position-relative d-block"
+            {items?.length > 0
+              ? items
+                  ?.filter(
+                    (i) => i.category === "Fruits" || i.category === "Produce"
+                  )
+                  .slice(0, 4)
+                  .map((item) => (
+                    <Link
+                      key={item?.id}
+                      to={`/store/${item?.category}/${item?.store_no}`}
+                      onClick={() => window.scrollTo(0, 0)}
+                      className="text-decoration-none position-relative d-block"
+                      style={{
+                        zIndex: 1,
+                        minHeight: 0 /* important for grid/flex shrink */,
+                      }}
+                    >
+                      {/* Card: flex column that fills grid cell */}
+                      <div
+                        className="bg-light border rounded-3 d-flex flex-column h-100"
+                        style={{
+                          padding: 0,
+                          overflow: "hidden",
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        {/* Image area (fills remaining space without overflowing) */}
+                        <div
+                          className="flex-grow-1 d-flex"
+                          style={{
+                            minHeight: 0,
+                            overflow: "hidden" /* allow shrinking */,
+                          }}
+                        >
+                          <img
+                            src={item?.gallery?.[0]}
+                            alt={item?.name}
+                            className="w-100 h-100 p-2"
+                            style={{
+                              objectFit: "cover",
+                              objectPosition: "center",
+                              display: "block",
+                            }}
+                          />
+                        </div>
+                        {/* Top header (fixed height) */}
+                        <div className="px-3 py-2" style={{ flex: "0 0 60px" }}>
+                          <div className="fw-semibold mb-1">{item?.name}</div>
+                          <small className="text-muted">
+                            {item?.quantity} Remaining
+                          </small>
+                        </div>
+
+                        <div
+                          className="px-2 py-1 d-flex justify-content-end gap-2"
+                          style={{ flex: "0 0 44px", alignItems: "center" }}
+                        >
+                          <button
+                            className="btn btn-sm btn-link p-1"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleAddWatchlist(item?.store_no);
+                            }}
+                          >
+                            <i
+                              className={`bi ${
+                                allWatchList.includes(item?.store_no)
+                                  ? "bi-eye-fill text-primary"
+                                  : "bi-eye"
+                              }`}
+                            />
+                          </button>
+
+                          <button
+                            className="btn btn-sm btn-link p-1"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleAddFavorite(item?.store_no);
+                            }}
+                          >
+                            <i
+                              className={`bi ${
+                                allFavorites.includes(item?.store_no)
+                                  ? "bi-heart-fill text-danger"
+                                  : "bi-heart"
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+              : [...Array(4)].map((index) => (
+                  <div
+                    key={index}
+                    className="text-decoration-none position-relative d-block placeholder-glow"
                     style={{
                       zIndex: 1,
-                      minHeight: 0 /* important for grid/flex shrink */,
+                      minHeight: 0, // important for grid/flex shrink
                     }}
                   >
-                    {/* Card: flex column that fills grid cell */}
+                    {/* Card container */}
                     <div
                       className="bg-light border rounded-3 d-flex flex-column h-100"
                       style={{
@@ -318,78 +374,58 @@ function HomePage() {
                         boxSizing: "border-box",
                       }}
                     >
-                      {/* Image area (fills remaining space without overflowing) */}
+                      {/* Image placeholder */}
                       <div
-                        className="flex-grow-1 d-flex"
+                        className="flex-grow-1 d-flex justify-content-center align-items-center"
                         style={{
                           minHeight: 0,
-                          overflow: "hidden" /* allow shrinking */,
+                          overflow: "hidden",
                         }}
                       >
-                        <img
-                          src={item?.gallery?.[0]}
-                          alt={item?.name}
-                          className="w-100 h-100 p-2"
+                        <div
+                          className="placeholder w-100 h-100"
                           style={{
-                            objectFit: "cover",
-                            objectPosition: "center",
-                            display: "block",
+                            backgroundColor: "rgba(0, 0, 0, 0.08)",
+                            aspectRatio: "1/1",
                           }}
-                        />
-                      </div>
-                      {/* Top header (fixed height) */}
-                      <div className="px-3 py-2" style={{ flex: "0 0 60px" }}>
-                        <div className="fw-semibold mb-1">{item?.name}</div>
-                        <small className="text-muted">
-                          {item?.quantity} Remaining
-                        </small>
+                        ></div>
                       </div>
 
-                      {/* Footer (fixed height for icons/actions) */}
+                      {/* Header area (name + quantity) */}
+                      <div className="px-3 py-2" style={{ flex: "0 0 60px" }}>
+                        <div
+                          className="placeholder col-8 mb-2"
+                          style={{ height: "16px", borderRadius: "4px" }}
+                        ></div>
+                        <div
+                          className="placeholder col-5"
+                          style={{ height: "12px", borderRadius: "4px" }}
+                        ></div>
+                      </div>
+
+                      {/* Icon buttons area */}
                       <div
                         className="px-2 py-1 d-flex justify-content-end gap-2"
                         style={{ flex: "0 0 44px", alignItems: "center" }}
                       >
-                        <button
-                          className="btn btn-sm btn-link p-1"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleAddWatchlist(item?.store_no);
+                        <div
+                          className="placeholder rounded-circle"
+                          style={{
+                            width: "24px",
+                            height: "24px",
                           }}
-                        >
-                          <i
-                            className={`bi ${
-                              allWatchList.includes(item?.store_no)
-                                ? "bi-eye-fill text-primary"
-                                : "bi-eye"
-                            }`}
-                          />
-                        </button>
-
-                        <button
-                          className="btn btn-sm btn-link p-1"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleAddFavorite(item?.store_no);
+                        ></div>
+                        <div
+                          className="placeholder rounded-circle"
+                          style={{
+                            width: "24px",
+                            height: "24px",
                           }}
-                        >
-                          <i
-                            className={`bi ${
-                              allFavorites.includes(item?.store_no)
-                                ? "bi-heart-fill text-danger"
-                                : "bi-heart"
-                            }`}
-                          />
-                        </button>
+                        ></div>
                       </div>
                     </div>
-                  </Link>
-                ))
-            ) : (
-              <div className="p-2">Loading items ...</div>
-            )}
+                  </div>
+                ))}
           </div>
         </div>
 
@@ -397,7 +433,6 @@ function HomePage() {
         <ProductPicks items={items} loading={loading} Fresh={true} />
       </div>
       <CallToAction />
-      <Footer />
     </>
   );
 }

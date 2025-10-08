@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 
-
 function CategoriesTab({ items, activeTab = null, isTopCategories = false }) {
   const containerRef = useRef();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -120,6 +119,8 @@ function CategoriesTab({ items, activeTab = null, isTopCategories = false }) {
     };
   }, []);
 
+  const categories = isTopCategories ? topCategories : allCategories;
+
   return (
     <div className="position-relative p-2 py-3 mb-2 mt-2 container">
       {canScrollPrev && (
@@ -139,64 +140,91 @@ function CategoriesTab({ items, activeTab = null, isTopCategories = false }) {
           scrollBehavior: "smooth",
         }}
       >
-        <Link
-          to={`/store/All Categories`}
-          key={"all-categories"}
-          className="text-decoration-none item d-flex p-2 flex-column justify-content-start align-items-center"
-          style={{
-            width: "160px",
-            minWidth: "160px",
-            aspectRatio: "1/1",
-            scrollSnapType: "x mandatory",
-            scrollSnapStop: "always",
-            border:
-              activeTab && activeTab === "All Categories"
-                ? "3px solid var(--primary-color)"
-                : "2px solid transparent",
-            borderRadius: "8px",
-            scrollSnapAlign: "start",
-          }}
-        >
-          <img
-            src={`/media/BorderAll.png`}
-            width={"100%"}
-            className="mb-2 object-fit-cover object-position-center p-3"
-            style={{ aspectRatio: "1/1" }}
-          />
-          <div className="3 text-black">All Categories</div>
-        </Link>
-        {(isTopCategories ? topCategories : allCategories || topCategories).map(
-          (category, index) => (
-            <Link
-              to={`/store/${category}`}
-              key={index}
-              className="text-decoration-none item d-flex p-2 flex-column justify-content-start align-items-center"
-              style={{
-                width: "160px",
-                minWidth: "160px",
-                aspectRatio: "1/1",
-                scrollSnapType: "x mandatory",
-                scrollSnapStop: "always",
-                border:
-                  activeTab && activeTab === category
-                    ? "3px solid var(--primary-color)"
-                    : "2px solid transparent",
-                borderRadius: "8px",
-                scrollSnapAlign: "start",
-              }}
-            >
-              <img
-                src={`${
-                  items?.find((item) => item.category === category)?.gallery[0]
-                }`}
-                width={"100%"}
-                className="mb-2 object-fit-cover object-position-center p-2"
-                style={{ aspectRatio: "1/1" }}
-              />
-              <div className="3 text-black">{category}</div>
-            </Link>
-          )
-        ) || <>Getting categories...</>}
+        {categories?.length > 0 && (
+          <Link
+            to={`/store/All Categories`}
+            key={"all-categories"}
+            className="text-decoration-none item d-flex p-2 flex-column justify-content-start align-items-center"
+            style={{
+              width: "160px",
+              minWidth: "160px",
+              aspectRatio: "1/1",
+              scrollSnapType: "x mandatory",
+              scrollSnapStop: "always",
+              border:
+                activeTab && activeTab === "All Categories"
+                  ? "3px solid var(--primary-color)"
+                  : "2px solid transparent",
+              borderRadius: "8px",
+              scrollSnapAlign: "start",
+            }}
+          >
+            <img
+              src={`/media/BorderAll.png`}
+              width={"100%"}
+              className="mb-2 object-fit-cover object-position-center p-3"
+              style={{ aspectRatio: "1/1" }}
+            />
+            <div className="3 text-black">All Categories</div>
+          </Link>
+        )}
+        {((isTopCategories ? topCategories : allCategories) || topCategories)
+          ?.length > 0
+          ? (isTopCategories
+              ? topCategories
+              : allCategories || topCategories
+            ).map((category, index) => (
+              <Link
+                to={`/store/${category}`}
+                key={index}
+                className="text-decoration-none item d-flex p-2 flex-column justify-content-start align-items-center"
+                style={{
+                  width: "160px",
+                  minWidth: "160px",
+                  aspectRatio: "1/1",
+                  scrollSnapType: "x mandatory",
+                  scrollSnapStop: "always",
+                  border:
+                    activeTab && activeTab === category
+                      ? "3px solid var(--primary-color)"
+                      : "2px solid transparent",
+                  borderRadius: "8px",
+                  scrollSnapAlign: "start",
+                }}
+              >
+                <img
+                  src={`${
+                    items?.find((item) => item.category === category)
+                      ?.gallery[0]
+                  }`}
+                  width={"100%"}
+                  className="mb-2 object-fit-cover object-position-center p-2"
+                  style={{ aspectRatio: "1/1" }}
+                />
+                <div className="3 text-black">{category}</div>
+              </Link>
+            ))
+          : [...Array(9)].map((_, index) => (
+              <div
+                key={`index-${index}`}
+                className="placeholder-glow text-decoration-none gap-2 item d-flex p-2 flex-column justify-content-start align-items-center"
+                style={{
+                  width: "160px",
+                  minWidth: "160px",
+                  aspectRatio: "1/1",
+                  scrollSnapType: "x mandatory",
+                  scrollSnapStop: "always",
+                  borderRadius: "8px",
+                  scrollSnapAlign: "start",
+                }}
+              >
+                <div
+                  className="placeholder rounded col-6 mb-2 object-fit-cover object-position-center w-100"
+                  style={{ aspectRatio: "1/1" }}
+                />
+                <div className="placeholder col-9" />
+              </div>
+            ))}
       </div>
       {canScrollNext && (
         <button

@@ -16,6 +16,9 @@ function CallToAction() {
             cursor: "pointer",
             backgroundColor: "var(--secondary-dark)",
           }}
+          onClick={() => {
+            window.scrollTo(0, 0, { behavior: "smooth" });
+          }}
         >
           Start Shopping
         </button>

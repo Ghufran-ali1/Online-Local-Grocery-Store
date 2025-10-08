@@ -4,14 +4,27 @@ import { CircularProgress, TablePagination } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { AdminContext } from "../AdminContext";
-import Header from "../components/Header";
 import AppBreadcrumbs from "../components/Breadcrumbs";
-import Footer from "../components/Footer";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
 import AdminView from "../components/AdminView";
+import { Link, Navigate, useNavigate } from "react-router";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import MenuItem from "@mui/material/MenuItem";
+import Menu from "@mui/material/Menu";
+
+const options = [
+  "Date (Newest first)",
+  "Date (Oldest first)",
+  "Alphabetical (A - Z)",
+  "Alphabetical (Z - A)",
+  "Stock Quantity (Less first)",
+  "Stock Quantity (More first)",
+];
 
 const style = {
   position: "absolute",
@@ -46,11 +59,42 @@ const shortStkId = () => {
   return `STK${value.toString().slice(0, 18)}`;
 };
 
+const getStatus = (date) => {
+  const reservedDate = new Date(date);
+  const today = new Date();
+
+  // Strip time for both dates
+  reservedDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  if (reservedDate < today) {
+    return (
+      <span className="p-1 m-0 px-3 w-100 text-danger alert rounded-pill alert-danger">
+        Overdue
+      </span>
+    );
+  } else if (reservedDate > today) {
+    return (
+      <span className="p-1 m-0 px-3 w-100 text-success alert rounded-pill alert-success">
+        Upcoming
+      </span>
+    );
+  } else {
+    return (
+      <span className="p-1 m-0 px-3 w-100 text-primary alert rounded-pill alert-primary">
+        Due Today
+      </span>
+    );
+  }
+};
+
 function AdminPage() {
   const [page, setPage] = useState(0);
   const { adminDetails, isLoading } = useContext(AdminContext);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [allCategories, setAllCategories] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [sortedItems, setSortedItems] = useState([]);
   const [allAdmins, setAllAdmins] = useState([]);
   const [newItemArray, setNewItemArray] = useState([
     {
@@ -67,6 +111,56 @@ function AdminPage() {
   const [openEdit, setOpenEdit] = useState({ state: false, store_no: null });
   const [editItemDetails, setEditItemDetails] = useState(null);
   const [editItemOriginalDetails, setEditItemOriginalDetails] = useState(null);
+  const navigate = useNavigate();
+  const messages = [
+    "Checking credentials ...",
+    "Verifying clearance ...",
+    "Almost there ...",
+    "Redirecting ...",
+  ];
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const openMenu = Boolean(anchorEl);
+  const handleClickListItem = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuItemClick = (event, index) => {
+    setSelectedIndex(index);
+    setAnchorEl(null);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  useEffect(() => {
+    const messageInterval = setInterval(() => {
+      setCurrentMessageIndex((prevIndex) => {
+        // stop incrementing once at the last message
+        if (prevIndex < messages.length - 1) {
+          return prevIndex + 1;
+        } else {
+          clearInterval(messageInterval); // stop the interval
+          return prevIndex; // stay at last index
+        }
+      });
+    }, 1000);
+
+    return () => clearInterval(messageInterval);
+  }, [adminDetails]);
+
+  useEffect(() => {
+    if (!adminDetails) {
+      const timer = setTimeout(() => {
+        navigate("/admin/login", { replace: true });
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [adminDetails, navigate]);
 
   useEffect(() => {
     fetch("https://grocery-store-server-theta.vercel.app/api/items")
@@ -115,9 +209,53 @@ function AdminPage() {
     setPage(0);
   };
 
-  // Sort and slice items for current page
-  const sortedItems = React.useMemo(() => {
-    return items?.slice().sort((a, b) => a.id - b.id) || [];
+  useEffect(() => {
+    if (!items) return;
+
+    let sorted = [...items];
+
+    switch (selectedIndex) {
+      case 0:
+        // Date (Newest first)
+        sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        break;
+
+      case 1:
+        // Date (Oldest first)
+        sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        break;
+
+      case 2:
+        // Alphabetical (A - Z)
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+
+      case 3:
+        // Alphabetical (Z - A)
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+
+      case 4:
+        // Stock Quantity (Less first)
+        sorted.sort((a, b) => a.quantity - b.quantity);
+        break;
+
+      case 5:
+        // Stock Quantity (More first)
+        sorted.sort((a, b) => b.quantity - a.quantity);
+        break;
+
+      default:
+        // No sorting or reset
+        sorted = [...items];
+        break;
+    }
+
+    setSortedItems(sorted);
+  }, [selectedIndex, items]);
+
+  useEffect(() => {
+    setSortedItems(items?.slice().sort((a, b) => a.id - b.id) || []);
   }, [items]);
 
   const pagedItems = React.useMemo(() => {
@@ -259,9 +397,23 @@ function AdminPage() {
     }
   };
 
+  useEffect(() => {
+    fetch("https://grocery-store-server-theta.vercel.app/api/reservations")
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => {
+        setReservations(data);
+      })
+      .catch((error) => {
+        setReservations([]);
+        console.error("Error fetching reservations:", error);
+      });
+  }, []);
+
   return (
     <>
-      <Header />
       <AppBreadcrumbs />
 
       <Modal
@@ -581,8 +733,8 @@ function AdminPage() {
               <div className="d-flex justify-content-between gap-2 align-items-center">
                 <h3 className="fw-bold">All Admins</h3>
                 <span className="d-flex gap-2 align-items-center">
-                  <i className="bi bi-cart-plus fs-5"></i>{" "}
-                  {allAdmins?.length || 0} admins found
+                  <i className="bi bi-person fs-5"></i> {allAdmins?.length || 0}{" "}
+                  admins found
                 </span>
               </div>
 
@@ -603,13 +755,110 @@ function AdminPage() {
           </div>
 
           <div className="border p-3 rounded-3 mb-3">
-            <div className="d-flex mb-3 justify-content-between gap-2 align-items-center">
-              <h3 className="fw-bold">Store Items</h3>
+            <div className="d-flex justify-content-between gap-2 align-items-center">
+              <h3 className="fw-bold">Reservations</h3>
               <span className="d-flex gap-2 align-items-center">
-                <i className="bi bi-cart-plus fs-5"></i> {items?.length || 0}{" "}
+                <i className="bi bi-clock fs-5"></i> {reservations?.length || 0}{" "}
                 items found
               </span>
             </div>
+            <div>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>No.</th>
+                    <th>Reservation No.</th>
+                    <th>Reserved by</th>
+                    <th>Email</th>
+                    <th>Item Name</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Reserved On</th>
+                    <th>For Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reservations.length > 0 ? (
+                    reservations?.map((item, index) => (
+                      <tr key={index}>
+                        <th>{index + 1}.</th>
+                        <td>{item.rsv_no}</td>
+                        <td>{item.reserved_by}</td>
+                        <td>{item.email}</td>
+                        <td>{item.name}</td>
+                        <td>{item.category}</td>
+                        <td>{item.quantity}</td>
+                        <td>
+                          {new Date(item.reserved_on)?.toLocaleDateString()}
+                        </td>
+                        <td>{new Date(item.date)?.toLocaleDateString()}</td>
+                        <td>{getStatus(item.date)}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td>No reservations yet!</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="border p-3 rounded-3 mb-3">
+            <div className="d-flex mb-3 justify-content-between gap-2 align-items-center">
+              <h3 className="fw-bold">Store Items</h3>
+              <div className="d-flex align-items-center gap-3">
+                <span className="d-flex gap-2 align-items-center">
+                  <i className="bi bi-cart-plus fs-5"></i> {items?.length || 0}{" "}
+                  items found
+                </span>
+                <span
+                  role="button"
+                  aria-expanded={openMenu ? "true" : undefined}
+                  onClick={handleClickListItem}
+                  className="d-flex fw-bold gap-2 align-items-center"
+                  title={options[selectedIndex]}
+                  style={{
+                    color: selectedIndex !== 0 && "var(--primary-color)",
+                  }}
+                >
+                  Sort by
+                  <i className="bi bi-funnel fs-5"></i>
+                </span>
+              </div>
+            </div>
+            <Menu
+              id="lock-menu"
+              anchorEl={anchorEl}
+              open={openMenu}
+              onClose={handleClose}
+              slotProps={{
+                list: {
+                  "aria-labelledby": "lock-button",
+                  role: "listbox",
+                },
+              }}
+            >
+              {options.map((option, index) => (
+                <MenuItem
+                  key={option}
+                  selected={index === selectedIndex}
+                  onClick={(event) => handleMenuItemClick(event, index)}
+                >
+                  <div
+                    className="w-100 small"
+                    style={{
+                      color:
+                        index === selectedIndex ? "var(--primary-color)" : "",
+                    }}
+                  >
+                    {option}
+                  </div>
+                </MenuItem>
+              ))}
+            </Menu>
             <div>
               {items?.length > 0 ? (
                 <div>
@@ -655,9 +904,9 @@ function AdminPage() {
                           Delete <i className="bi bi-trash"></i>
                         </button>
                       </div>
-                      <a
+                      <Link
                         className="hoverBorder"
-                        href={`/store/${editItemDetails?.category}/${editItemDetails?.store_no}`}
+                        href={`/store/${item?.category}/${item?.store_no}`}
                         target="_blank"
                       >
                         <img
@@ -666,7 +915,7 @@ function AdminPage() {
                           height={250}
                           src={item.gallery[0]}
                         />
-                      </a>
+                      </Link>
                       <div className="w-100 p-1">
                         <table className="table adminStoreItemDetails table-sm">
                           <tbody>
@@ -966,14 +1215,11 @@ function AdminPage() {
           </div>
         </div>
       ) : (
-        ((window.location.href = "/admin/login"),
-        (
-          <div className="d-flex flex-column gap-3 justify-content-center align-items-center py-5 text-muted">
-            Redirecting ...
-          </div>
-        ))
+        <div className="d-flex flex-column gap-3 justify-content-center align-items-center py-5 text-muted">
+          <CircularProgress size={25} />
+          {messages[currentMessageIndex]}
+        </div>
       )}
-      <Footer />
     </>
   );
 }

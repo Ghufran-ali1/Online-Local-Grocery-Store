@@ -1,8 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link } from "react-router";
-import Footer from "../components/Footer";
 import AppBreadcrumbs from "../components/Breadcrumbs";
-import Header from "../components/Header";
 import axios from "axios";
 import { AdminContext } from "../AdminContext";
 import { CircularProgress } from "@mui/material";
@@ -11,11 +9,11 @@ import { GppBadOutlined } from "@mui/icons-material";
 function AdminSignupPage() {
   const { adminDetails, isLoading } = useContext(AdminContext);
   const [formData, setFormData] = useState({
-    username: "Suzan",
-    email: "suzan5@staff.alistore.com",
-    role: "Staff",
-    password: "123456789",
-    confirmPassword: "123456789",
+    username: "",
+    email: "",
+    role: "",
+    password: "",
+    confirmPassword: "",
   });
   const [message, setMessage] = useState("");
 
@@ -87,7 +85,6 @@ function AdminSignupPage() {
   };
   return (
     <>
-      <Header />
       <AppBreadcrumbs />
       <div className="container m-auto pb-3">
         <div className="border p-3 rounded-3 mb-3">
@@ -253,7 +250,6 @@ function AdminSignupPage() {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 }

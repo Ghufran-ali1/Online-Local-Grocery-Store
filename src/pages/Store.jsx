@@ -13,9 +13,7 @@ import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ProductItem from "../components/ProductItem";
-import Footer from "../components/Footer";
 import AppBreadcrumbs from "../components/Breadcrumbs";
-import Header from "../components/Header";
 import CallToAction from "../components/CallToAction";
 import NewItemCreateCTA from "../components/NewItemCreateCTA";
 
@@ -31,14 +29,13 @@ function Store() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
-useEffect(() => {
-  fetch("https://grocery-store-server-theta.vercel.app/api/items")
-    .then((res) => res.json())
-    .then((data) => setItems(data))
-    .catch((err) => setItems([]))
-    .finally(() => setLoading(false));
-}, []);
+  useEffect(() => {
+    fetch("https://grocery-store-server-theta.vercel.app/api/items")
+      .then((res) => res.json())
+      .then((data) => setItems(data))
+      .catch((err) => setItems([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -80,6 +77,7 @@ useEffect(() => {
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Sort and slice items for current page
@@ -95,7 +93,6 @@ useEffect(() => {
 
   return (
     <>
-      <Header />
       <AppBreadcrumbs />
       <div className="container m-auto min-vh-100">
         <CatehgoriesTab items={items} />
@@ -224,32 +221,89 @@ useEffect(() => {
                 </Menu>
               </div>
             </div>
-            {items?.length > 0 ? (
-              <div
-                className="d-grid gap-3 justify-content-start"
-                style={{
-                  // 👉 gridTemplateColumns collapses to 1 column for list view
-                  gridTemplateColumns:
-                    view === "grid" ? `repeat(${columnCount}, 1fr)` : "1fr",
-                }}
-              >
-                {pagedItems?.map((item) => (
-                  <ProductItem
-                    display={view}
-                    key={item.id}
-                    ProductDetails={item}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center p-5 w-100">
-                {loading ? (
-                  <div>Loading items ...</div>
-                ) : (
-                  <span>Loading items ...</span>
-                )}
-              </div>
-            )}
+            <div
+              className="d-grid gap-3 justify-content-start"
+              style={{
+                // 👉 gridTemplateColumns collapses to 1 column for list view
+                gridTemplateColumns:
+                  view === "grid" ? `repeat(${columnCount}, 1fr)` : "1fr",
+              }}
+            >
+              {loading
+                ? [...Array(12)].map((_, index) => (
+                    <div
+                      key={index}
+                      style={{ zIndex: 1, lineHeight: 1.5 }}
+                      className="text-decoration-none placeholder-glow position-relative mb-3"
+                    >
+                      {/* top right badges */}
+                      <div
+                        className="d-flex gap-2 position-absolute"
+                        style={{ top: "8px", right: "8px", zIndex: 10 }}
+                      >
+                        <div
+                          className="small placeholder col-2 p-1 px-2 border-0 outline-0 rounded-2"
+                          style={{
+                            width: "60px",
+                            height: "20px",
+                          }}
+                        />
+                        <div
+                          className="small placeholder col-2 p-1 px-2 border-0 outline-0 rounded-2"
+                          style={{
+                            width: "65px",
+                            height: "20px",
+                          }}
+                        />
+                      </div>
+
+                      {/* card container */}
+                      <div
+                        className="text-decoration-none item d-flex p-2 pt-3 pb-1 flex-column justify-content-start align-items-start border productItem"
+                        style={{
+                          width: "250px",
+                          aspectRatio: "1/1",
+                          scrollSnapType: "x mandatory",
+                          scrollSnapStop: "always",
+                          borderRadius: "8px",
+                          scrollSnapAlign: "start",
+                        }}
+                      >
+                        {/* image placeholder */}
+                        <div
+                          className="placeholder rounded mb-3 w-100"
+                          style={{
+                            aspectRatio: "3/2.5",
+                            backgroundColor: "rgba(0,0,0,0.08)",
+                          }}
+                        ></div>
+
+                        {/* text placeholders */}
+                        <div className="px-1 m-0 w-100">
+                          <div
+                            className="placeholder col-8 mb-2"
+                            style={{ height: "16px", borderRadius: "4px" }}
+                          ></div>
+                          <div
+                            className="placeholder col-12 mb-1"
+                            style={{ height: "12px", borderRadius: "4px" }}
+                          ></div>
+                          <div
+                            className="placeholder col-6"
+                            style={{ height: "12px", borderRadius: "4px" }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                : pagedItems.map((item) => (
+                    <ProductItem
+                      display={view}
+                      key={item.id}
+                      ProductDetails={item}
+                    />
+                  ))}
+            </div>
 
             <TablePagination
               count={items?.length || 0}
@@ -263,7 +317,6 @@ useEffect(() => {
         </div>
       </div>
       <CallToAction />
-      <Footer />
     </>
   );
 }

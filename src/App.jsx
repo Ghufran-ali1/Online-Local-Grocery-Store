@@ -10,12 +10,13 @@ import AdminPage from './pages/AdminPage';
 import AdminSignupPage from './pages/AdminSignupPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import { AdminAuthProvider } from './AdminContext';
+import Layout from './components/Layout';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route>
+        <Route path='/' element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/store" element={<Store />} />
           <Route path="/store/:category" element={<Category />} />
