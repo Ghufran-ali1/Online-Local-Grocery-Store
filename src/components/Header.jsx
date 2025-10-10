@@ -534,6 +534,7 @@ function Header() {
                             .toLowerCase()
                             .replace(/\s+/g, "-")}/${item.store_no}`}
                           key={item.id}
+                          onClick={()=> setOpen(false)}
                         >
                           <div className="border-bottom w-100 rounded-3 searchhover mb-2 p-1 px-2 mt-0 d-flex gap-2 align-items-center">
                             <img
