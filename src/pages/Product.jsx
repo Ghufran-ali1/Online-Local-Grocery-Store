@@ -39,17 +39,12 @@ function Product() {
   const currentFavs = storedFav ? JSON.parse(storedFav) : [];
   const [favoritesIdentifiers, setFavoritesIdentifiers] = useState(currentFavs);
   const [newReservation, setNewReservation] = useState({
-    reserved_by: "Test User",
-    email: "test@example.com",
-    date: new Date().toISOString().split("T")[0],
-    quantity: 10,
+    reserved_by: "",
+    email: "",
+    date: "",
+    quantity: 5,
   });
 
-  <th>Reservation No.</th>;
-  // <th>Reserved by</th>
-  // <th>store_no</th>
-  // <th>Item Name</th>
-  // <th>Category</th>
   useEffect(() => {
     fetch(`https://grocery-store-server-theta.vercel.app/api/items`)
       .then((res) => {
@@ -166,29 +161,28 @@ function Product() {
       .then((data) => {
         if (data.error) throw new Error(data.error);
 
-        fetch(
-          `https://grocery-store-server-theta.vercel.app/api/update-item`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              id: productDetails?.id,
-              name: productDetails?.name,
-              category: productDetails?.category,
-              description: productDetails?.description,
-              quantity: (parseInt(productDetails?.quantity) - newReservation.quantity),
-              gallery: productDetails?.gallery,
-              views: productDetails?.views,
-            }),
-          }
-        )
+        fetch(`https://grocery-store-server-theta.vercel.app/api/update-item`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: productDetails?.id,
+            name: productDetails?.name,
+            category: productDetails?.category,
+            description: productDetails?.description,
+            quantity:
+              parseInt(productDetails?.quantity) - newReservation.quantity,
+            gallery: productDetails?.gallery,
+            views: productDetails?.views,
+          }),
+        })
           .then((res) => res.json())
           .then((data) => {
             setProductDetails({
               ...productDetails,
-              quantity: (parseInt(productDetails?.quantity) - newReservation.quantity)
+              quantity:
+                parseInt(productDetails?.quantity) - newReservation.quantity,
             });
           })
           .catch((err) => {
@@ -504,10 +498,12 @@ function Product() {
                   style={{ width: "70px" }}
                   max={productDetails?.quantity}
                   value={newReservation.quantity}
-                  onChange={(e) => setNewReservation({
-                    ...newReservation,
-                    quantity: e.target.value,
-                  })}
+                  onChange={(e) =>
+                    setNewReservation({
+                      ...newReservation,
+                      quantity: e.target.value,
+                    })
+                  }
                   className="p-2 text-center rounded-2 border-1 outline-0"
                   type="number"
                 />
