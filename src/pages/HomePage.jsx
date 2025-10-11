@@ -12,10 +12,24 @@ function HomePage() {
   const stored = localStorage.getItem("watchlist");
   const currentWatchList = stored ? JSON.parse(stored) : [];
   const [allWatchList, setAllWatchlist] = useState(currentWatchList);
-
+  const messages = [
+    "convenient",
+    "super fast",
+    "very easy",
+  ];
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const storedFav = localStorage.getItem("favorites");
   const currentFavs = storedFav ? JSON.parse(storedFav) : [];
   const [allFavorites, setAllFavorites] = useState(currentFavs);
+
+useEffect(() => {
+  const messageInterval = setInterval(() => {
+    setCurrentMessageIndex((prevIndex) => (prevIndex + 1) % (messages.length));
+  }, 5000);
+
+  return () => clearInterval(messageInterval);
+}, []);
+
 
   useEffect(() => {
     try {
@@ -82,21 +96,21 @@ function HomePage() {
             backgroundRepeat: "no-repeat", // no tiling
             backgroundSize: "cover", // keep the whole image visible
             backgroundPosition: "right center", // lock it to the right
-            minHeight: "90vh",
+            minHeight: "95vh",
           }}
         >
           <div className="container px-4 m-auto rounded-0">
             <div>
-              <div className="text-uppercase mb-2">
+              <div className="text-uppercase mb-3">
                 <u> Grocery made convenient </u>
               </div>
               <h1 className="fw-bold homeTitle">
                 Make your{" "}
                 <span style={{ color: "var(--primary-color)" }}>
-                  grocery <br /> shopping <u>convenient</u>.
+                  grocery <br /> shopping <u>{messages[currentMessageIndex]}</u>.
                 </span>
               </h1>
-              <p className="py-2" style={{ maxWidth: "700px" }}>
+              <p className="py-2 mt-4 mb-3" style={{ maxWidth: "750px" }}>
                 We are committed to providing the best online shopping
                 experience with a wide range of products at competitive prices.
                 keep your home stocked with essentials and discover new
