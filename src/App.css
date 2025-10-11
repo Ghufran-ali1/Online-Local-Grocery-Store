@@ -146,9 +146,15 @@ footer textarea.form-control {
     -webkit-text-fill-color: transparent;
     font-weight: bold;
     letter-spacing: 2px;
-    /* optional, makes the gradient pop */
+    animation: shine 3s linear infinite;
   }
 
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
 }
 
 @media (max-width: 768px) {
