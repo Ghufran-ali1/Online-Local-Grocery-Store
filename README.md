@@ -6,8 +6,6 @@ This project is the **client-side (frontend)** of the Ali Groceries system, buil
 
 Live Preview → [ghufran-grocery-store.vercel.app](https://ghufran-grocery-store.vercel.app)
 
----
-
 ## Features
 
 ### Customer Features
@@ -29,8 +27,6 @@ Live Preview → [ghufran-grocery-store.vercel.app](https://ghufran-grocery-stor
 - Fast load times with Vite HMR (Hot Module Replacement).
 - Consistent color palette and spacing for visual harmony.
 - Accessible navigation and intuitive layout.
-
----
 
 ## Technologies Used
 
@@ -65,12 +61,13 @@ The app will run locally at:
 ```
 http://localhost:5173
 ```
-4️⃣ Build for production
+### 4. Build for production
 ```
 npm run build
 ```
 
-## 🧪 Testing
+
+## Testing
 
 ### Manual Test Scenarios
 
