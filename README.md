@@ -6,6 +6,8 @@ This project is the **client-side (frontend)** of the Ali Groceries system, buil
 
 Live Preview → [ghufran-grocery-store.vercel.app](https://ghufran-grocery-store.vercel.app)
 
+<br>
+
 ## Features
 
 ### Customer Features
