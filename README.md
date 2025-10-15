@@ -30,6 +30,8 @@ Live Preview → [ghufran-grocery-store.vercel.app](https://ghufran-grocery-stor
 - Consistent color palette and spacing for visual harmony.
 - Accessible navigation and intuitive layout.
 
+<br>
+
 ## Technologies Used
 
 | Category | Technology | Description |
@@ -41,6 +43,7 @@ Live Preview → [ghufran-grocery-store.vercel.app](https://ghufran-grocery-stor
 | **Deployment** | Vercel | Fast and reliable hosting for modern web apps |
 | **Version Control** | Git + GitHub | Branching, PRs, and issue tracking |
 
+<br>
 
 ## Installation & Setup
 
@@ -68,6 +71,7 @@ http://localhost:5173
 npm run build
 ```
 
+<br>
 
 ## Testing
 
@@ -83,18 +87,20 @@ npm run build
 
 > **Note:** Unit testing setup can be integrated with **Jest** or **Vitest** for component-level validation.
 
----
 
-## 💬 Code Quality & Documentation
+<br>
+
+## Code Quality & Documentation
 
 - Consistent **indentation**, **naming**, and **folder structure**.  
 - Each component and function includes **comments** explaining purpose, inputs, and expected outputs.  
 - **ESLint** ensures clean and maintainable code.  
 - Every file has a **sensible name and extension** matching its content and purpose.  
 
----
 
-## 🧩 GitHub Repository Standards
+<br>
+
+## GitHub Repository Standards
 
 - ✅ `.gitignore` properly configured (node_modules, dist, env, etc.)  
 - ✅ Issue tracker used for bug reports and enhancements  
@@ -102,23 +108,23 @@ npm run build
 - ✅ Pull Requests for merging updates  
 - ✅ Clean commit history with meaningful messages  
 
----
+<br>
 
-## 📈 Roadmap
+## Roadmap
 
 - [ ] Add low-stock alerts on admin dashboard  
 - [ ] Introduce dark mode for better accessibility  
 - [ ] Enable item delivery scheduling  
 - [ ] Add analytics section for store insights  
 
----
 
 ## 📜 License
 
 This project is open source under the **MIT License**.  
 Feel free to use, modify, and distribute with proper credit.
 
----
+<br>
+
 
 ## 👨‍💻 Author
 
@@ -128,7 +134,4 @@ Full-Stack Developer | CISC 4900 Capstone 2025
 
 > Built with ❤️ using **React + Vite**, for local stores moving into the digital era.
 EOF
-
-echo "✅ README.md successfully generated."
-
 
