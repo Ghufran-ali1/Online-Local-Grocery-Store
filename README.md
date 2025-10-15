@@ -80,23 +80,19 @@ npm run build
 
 ## Project Structure
 
-\> Online-Local-Grocery-Store/
+    > Online-Local-Grocery-Store/
+    > public/                # Static assets (logos, images, manifest, etc.)
+    > src/
+      > assets/              # Images, icons, and media files specific to components or pages
+      > pages/               # Page-level views (e.g., Home, AdminDashboard, Reservations)
+      > context/             # Global state management using React Context API (e.g., AuthContext, CartContext)
+      > utils/               # Helper functions and utilities (e.g., API calls, data formatting)
+      > App.jsx              # The root React component that sets up routing and context providers
+      > main.jsx             # Application entry point, mounts the React app to the DOM
+      > styles.css           # Global stylesheet for consistent theming and basic layout
   
-  \> public/                # Static assets (logos, images, manifest, etc.)
-  
-  \> src/
-    
-    \> assets/              # Images, icons, and media files specific to components or pages
-    \> components/          # Reusable UI components (e.g., Navbar, ItemCard, Footer)
-    \> pages/               # Page-level views (e.g., Home, AdminDashboard, Reservations)
-    \> context/             # Global state management using React Context API (e.g., AuthContext, CartContext)
-    \> utils/               # Helper functions and utilities (e.g., API calls, data formatting)
-    \> App.jsx              # The root React component that sets up routing and context providers
-    \> main.jsx             # Application entry point, mounts the React app to the DOM
-    \> styles.css           # Global stylesheet for consistent theming and basic layout
-  
-  \> .gitignore             # Specifies files and directories to be ignored by Git (e.g., node_modules, build outputs)
-  \> eslint.config.js       # ESLint rules configuration for code quality enforcement
+    > .gitignore             # Specifies files and directories to be ignored by Git (e.g., node_modules, build outputs)
+    > eslint.config.js       # ESLint rules configuration for code quality enforcement
   \> index.html             # The main HTML entry file where the Vite build is injected
   \> package.json           # Project metadata, script definitions, and dependency list
   \> vite.config.js         # Vite configuration for development server, bundling, and HMR (Hot Module Replacement)
