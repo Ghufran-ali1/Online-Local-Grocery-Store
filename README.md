@@ -117,8 +117,9 @@ npm run build
 - [ ] Enable item delivery scheduling  
 - [ ] Add analytics section for store insights  
 
+<br>
 
-## 📜 License
+## License
 
 This project is open source under the **MIT License**.  
 Feel free to use, modify, and distribute with proper credit.
@@ -126,7 +127,7 @@ Feel free to use, modify, and distribute with proper credit.
 <br>
 
 
-## 👨‍💻 Author
+## Author
 
 **Ghufran Ali**  
 Full-Stack Developer | CISC 4900 Capstone 2025  
