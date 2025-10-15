@@ -80,7 +80,6 @@ npm run build
 
 ## Project Structure
 
-\`\`\`
 Online-Local-Grocery-Store/
 │
 ├── public/                # Static assets (logos, images, manifest, etc.)
@@ -101,8 +100,6 @@ Online-Local-Grocery-Store/
 ├── package.json           # Project metadata, script definitions, and dependency list
 ├── vite.config.js         # Vite configuration for development server, bundling, and HMR (Hot Module Replacement)
 └── README.md              # Project documentation (overview, setup, structure, and usage)
-\`\`\`
-EOF
 
 <br>
 
