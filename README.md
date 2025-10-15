@@ -1,12 +1,55 @@
-# React + Vite
+# 🛒 Online Local Grocery Store – React + Vite Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern and responsive web application for a neighborhood grocery store, allowing customers to browse available products, check stock quantities, view item details, and make online reservations — while store staff can manage inventory through an admin interface.
 
-Currently, two official plugins are available:
+This project is the **client-side (frontend)** of the Ali Groceries system, built with **React + Vite** for optimal performance, modularity, and development speed.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Live Preview → [ghufran-grocery-store.vercel.app](https://ghufran-grocery-store.vercel.app)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🚀 Features
+
+### 🧍 Customer Features
+- View available grocery items with name, price, and stock quantity.
+- Filter by categories such as fruits, vegetables, and dairy.
+- Add items to favorites or watchlist.
+- Make and manage reservations for in-store pickup.
+- Fully responsive for desktop and mobile use.
+
+### 🧑‍💼 Admin Features
+- Secure login authentication.
+- Dashboard to manage inventory (CRUD operations).
+- Update quantities, prices, and product information.
+- View and manage customer reservations.
+- Real-time UI feedback on updates.
+
+### 🧩 UI & UX Highlights
+- Clean and modern design using React components.
+- Fast load times with Vite HMR (Hot Module Replacement).
+- Consistent color palette and spacing for visual harmony.
+- Accessible navigation and intuitive layout.
+
+---
+
+## 🧠 Technologies Used
+
+| Category | Technology | Description |
+|-----------|-------------|-------------|
+| **Frontend** | React 19 + Vite | Component-based UI with blazing-fast builds |
+| **Styling** | CSS3 | Responsive and adaptive layout design |
+| **State Management** | React Hooks / Context API | Manage global and local state |
+| **Routing** | React Router | Client-side routing for pages and admin dashboard |
+| **Deployment** | Vercel | Fast and reliable hosting for modern web apps |
+| **Version Control** | Git + GitHub | Branching, PRs, and issue tracking |
+
+---
+
+## ⚙️ Installation & Setup
+
+Follow these steps to run the client locally.
+
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/Ghufran-ali1/Online-Local-Grocery-Store.git
+cd Online-Local-Grocery-Store
