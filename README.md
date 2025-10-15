@@ -73,6 +73,11 @@ npm run build
 
 <br>
 
+### Version History
+- v1.0.0 (Oct 2025): Initial MVP release with customer reservation, admin CRUD, and responsive design.
+
+<br>
+
 ## Testing
 
 ### Manual Test Scenarios
