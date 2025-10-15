@@ -113,7 +113,7 @@ Online-Local-Grocery-Store/
 - **pages/** correspond directly to full-page views rendered via React Router.
 - **context/** manages shared global state such as user sessions, shopping cart data, and application settings.
 - **utils/** holds general-purpose helper functions for tasks like data formatting, validation, and managing API calls.
-- The project follows a consistent file naming convention and indentation style to ensure high maintainability and readability.
+> **Note:** The project follows a consistent file naming convention and indentation style to ensure high maintainability and readability.
 "
 
 
