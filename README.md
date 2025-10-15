@@ -1,4 +1,4 @@
-# 🛒 Online Local Grocery Store – React + Vite Client
+# Online Local Grocery Store – React + Vite Client
 
 A modern and responsive web application for a neighborhood grocery store, allowing customers to browse available products, check stock quantities, view item details, and make online reservations — while store staff can manage inventory through an admin interface.
 
