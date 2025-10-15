@@ -102,6 +102,7 @@ Online-Local-Grocery-Store/
 ├── vite.config.js         # Vite configuration for development server, bundling, and HMR (Hot Module Replacement)
 └── README.md              # Project documentation (overview, setup, structure, and usage)
 \`\`\`
+EOF
 
 <br>
 
