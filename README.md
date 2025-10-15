@@ -119,9 +119,10 @@ npm run build
 |----------|-------------|-----------------|
 | **TC-01** | Load homepage | Items and categories display correctly |
 | **TC-02** | Search for “Milk” | Displays all items with name “Milk” |
-| **TC-03** | Add to Favorites | Item saved in user’s favorites |
+| **TC-03** | Add to Favorites & Wishlist | Item saved in user’s favorites and wishlists |
 | **TC-04** | Admin Login | Redirects to admin dashboard after authentication |
 | **TC-05** | Update Stock Quantity | Reflects changes instantly in item list |
+| **TC-06** | Request reservation of specified quantity of items | Reflects reservations instantly in Admin Dashboardt |
 
 > **Note:** Unit testing setup can be integrated with **Jest** or **Vitest** for component-level validation.
 
