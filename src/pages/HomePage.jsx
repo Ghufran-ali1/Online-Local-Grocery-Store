@@ -90,12 +90,12 @@ useEffect(() => {
         <div
           className="text-light d-flex justify-content-center py-5 m-0 p-0"
           style={{
-            backgroundColor: "var(--primary-dark)", // base color
+            backgroundColor: "var(--primary-dark)", 
             backgroundImage: 'url("/media/hero-bg.png")',
-            backgroundBlendMode: "normal", // or 'multiply' if you want a tint
-            backgroundRepeat: "no-repeat", // no tiling
-            backgroundSize: "cover", // keep the whole image visible
-            backgroundPosition: "right center", // lock it to the right
+            backgroundBlendMode: "normal",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "right center",
             minHeight: "95vh",
           }}
         >
@@ -376,7 +376,7 @@ useEffect(() => {
                     className="text-decoration-none position-relative d-block placeholder-glow"
                     style={{
                       zIndex: 1,
-                      minHeight: 0, // important for grid/flex shrink
+                      minHeight: 0, 
                     }}
                   >
                     {/* Card container */}

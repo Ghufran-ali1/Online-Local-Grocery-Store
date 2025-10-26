@@ -5,8 +5,8 @@ import AppBreadcrumbs from "../components/Breadcrumbs";
 
 function AdminLoginPage() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("Test User");
+  const [password, setPassword] = useState("123456789");
   const [message, setMessage] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
   const { setAdminDetails } = useContext(AdminContext);
