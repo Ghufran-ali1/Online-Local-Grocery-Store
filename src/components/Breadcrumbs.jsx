@@ -1,12 +1,12 @@
 // src/components/Breadcrumbs.jsx
 import { useLocation, Link as RouterLink, useParams } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
-import { ProductContext } from "../ProductContext";
+import { ProductContext } from "../context/ProductContext";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { AdminContext } from "../AdminContext";
+import { AdminContext } from "../context/AdminContext";
 import {
   AccountCircle,
   AccountCircleOutlined,

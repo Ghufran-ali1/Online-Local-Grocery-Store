@@ -9,7 +9,7 @@ import ProductProvider from './ProductProvider';
 import AdminPage from './pages/AdminPage';
 import AdminSignupPage from './pages/AdminSignupPage';
 import AdminLoginPage from './pages/AdminLoginPage';
-import { AdminAuthProvider } from './AdminContext';
+import { AdminAuthProvider } from './context/AdminContext';
 import Layout from './components/Layout';
 
 function App() {

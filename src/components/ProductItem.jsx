@@ -7,9 +7,11 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
   const currentWatchList = stored ? JSON.parse(stored) : [];
   const [allWatchList, setAllWatchlist] = useState(currentWatchList);
 
-  const storedFav = localStorage.getItem("favorites");
-  const currentFavs = storedFav ? JSON.parse(storedFav) : [];
-  const [allFavorites, setAllFavorites] = useState(currentFavs);
+  const storedReservations = localStorage.getItem("reservations");
+  const currentReservations = storedReservations
+    ? JSON.parse(storedReservations)
+    : [];
+  const [allReservations, setAllReservations] = useState(currentReservations);
 
   const handleAddWatchlist = (store_no) => {
     const stored = localStorage.getItem("watchlist");
@@ -28,22 +30,6 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
     window.dispatchEvent(new Event("watchlist-updated"));
   };
 
-  const handleAddFavorite = (store_no) => {
-    const stored = localStorage.getItem("favorites");
-    const current = stored ? JSON.parse(stored) : [];
-
-    let updated;
-    if (!current.includes(store_no)) {
-      updated = [...current, store_no];
-    } else {
-      updated = current.filter((no) => no !== store_no);
-    }
-
-    setAllFavorites(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
-
-    window.dispatchEvent(new Event("favorites-updated"));
-  };
 
   if (!ProductDetails) {
     return;
@@ -89,7 +75,7 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
           width={display === "grid" ? "100%" : "200px"}
           className="mb-2 object-fit-cover object-position-center p-2"
           style={{
-            aspectRatio: "1/1",
+            aspectRatio: "1/.91",
             objectFit: "cover",
             objectPosition: "center",
           }}
@@ -99,8 +85,8 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
             <div className="fw-semibold m-0 p-0 fs-6 singleLineClamp">
               {ProductDetails?.name}
             </div>
-            <small style={{ color: "var(--text-light)" }}>
-              {ProductDetails?.quantity} Remaining
+            <small className="singleLineClamp" style={{ color: "var(--text-light)" }}>
+              {ProductDetails?.quantity} Remaining | {ProductDetails?.description}
             </small>
 
             {/* <div className='small mt-2'><strong>Description: </strong></div>
@@ -117,6 +103,7 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
 
                 handleAddWatchlist(ProductDetails?.store_no);
               }}
+              title="Add to Watchlist"
             >
               <i
                 className={`bi ${
@@ -132,7 +119,7 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
                 }}
               ></i>
             </IconButton>
-            <IconButton
+            {/* <IconButton
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -142,18 +129,18 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
             >
               <i
                 className={`bi ${
-                  allFavorites.includes(ProductDetails?.store_no)
+                  allReservations.includes(ProductDetails?.store_no)
                     ? "bi-heart-fill"
                     : "bi-heart"
                 } small`}
                 style={{
                   lineHeight: "0",
-                  color: allFavorites.includes(ProductDetails?.store_no)
+                  color: allReservations.includes(ProductDetails?.store_no)
                     ? "red"
                     : "",
                 }}
               ></i>
-            </IconButton>
+            </IconButton> */}
           </div>
         </div>
       </div>

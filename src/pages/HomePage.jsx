@@ -1,7 +1,6 @@
 import { ChevronRight } from "@mui/icons-material";
 import CategoriesTab from "../components/CategoriesTab";
 import ProductPicks from "../components/ProductPicks";
-import ProductItem from "../components/ProductItem";
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import CallToAction from "../components/CallToAction";
@@ -12,24 +11,16 @@ function HomePage() {
   const stored = localStorage.getItem("watchlist");
   const currentWatchList = stored ? JSON.parse(stored) : [];
   const [allWatchList, setAllWatchlist] = useState(currentWatchList);
-  const messages = [
-    "convenient",
-    "super fast",
-    "very easy",
-  ];
+  const messages = ["convenient", "super fast", "very easy"];
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const storedFav = localStorage.getItem("favorites");
-  const currentFavs = storedFav ? JSON.parse(storedFav) : [];
-  const [allFavorites, setAllFavorites] = useState(currentFavs);
 
-useEffect(() => {
-  const messageInterval = setInterval(() => {
-    setCurrentMessageIndex((prevIndex) => (prevIndex + 1) % (messages.length));
-  }, 5000);
+  useEffect(() => {
+    const messageInterval = setInterval(() => {
+      setCurrentMessageIndex((prevIndex) => (prevIndex + 1) % messages.length);
+    }, 5000);
 
-  return () => clearInterval(messageInterval);
-}, []);
-
+    return () => clearInterval(messageInterval);
+  }, []);
 
   useEffect(() => {
     try {
@@ -67,30 +58,13 @@ useEffect(() => {
     window.dispatchEvent(new Event("watchlist-updated"));
   };
 
-  const handleAddFavorite = (store_no) => {
-    const stored = localStorage.getItem("favorites");
-    const current = stored ? JSON.parse(stored) : [];
-
-    let updated;
-    if (!current.includes(store_no)) {
-      updated = [...current, store_no];
-    } else {
-      updated = current.filter((no) => no !== store_no);
-    }
-
-    setAllFavorites(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
-
-    window.dispatchEvent(new Event("favorites-updated"));
-  };
-
   return (
     <>
       <div>
         <div
           className="text-light d-flex justify-content-center py-5 m-0 p-0"
           style={{
-            backgroundColor: "var(--primary-dark)", 
+            backgroundColor: "var(--primary-dark)",
             backgroundImage: 'url("/media/hero-bg.png")',
             backgroundBlendMode: "normal",
             backgroundRepeat: "no-repeat",
@@ -107,7 +81,8 @@ useEffect(() => {
               <h1 className="fw-bold homeTitle">
                 Make your{" "}
                 <span style={{ color: "var(--primary-color)" }}>
-                  grocery <br /> shopping <u>{messages[currentMessageIndex]}</u>.
+                  grocery <br /> shopping <u>{messages[currentMessageIndex]}</u>
+                  .
                 </span>
               </h1>
               <p className="py-2 mt-4 mb-3" style={{ maxWidth: "750px" }}>
@@ -349,23 +324,6 @@ useEffect(() => {
                               }`}
                             />
                           </button>
-
-                          <button
-                            className="btn btn-sm btn-link p-1"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleAddFavorite(item?.store_no);
-                            }}
-                          >
-                            <i
-                              className={`bi ${
-                                allFavorites.includes(item?.store_no)
-                                  ? "bi-heart-fill text-danger"
-                                  : "bi-heart"
-                              }`}
-                            />
-                          </button>
                         </div>
                       </div>
                     </Link>
@@ -376,7 +334,7 @@ useEffect(() => {
                     className="text-decoration-none position-relative d-block placeholder-glow"
                     style={{
                       zIndex: 1,
-                      minHeight: 0, 
+                      minHeight: 0,
                     }}
                   >
                     {/* Card container */}
