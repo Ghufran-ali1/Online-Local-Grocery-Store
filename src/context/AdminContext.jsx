@@ -1,9 +1,9 @@
 // AdminContext
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from "react";
 export const AdminContext = createContext();
 
 export const AdminAuthProvider = ({ children }) => {
-  const [ adminDetails, setAdminDetails ] = useState(null);
+  const [adminDetails, setAdminDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Track loading state
 
   // Function to fetch admin details based on token
@@ -12,22 +12,19 @@ export const AdminAuthProvider = ({ children }) => {
       setIsLoading(false); // Stop loading if no token
       return;
     }
-
     try {
-      const response = await fetch(`https://grocery-store-server-theta.vercel.app/api/admin-details`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
+      const response = await fetch(
+        `https://grocery-store-server-theta.vercel.app/api/admin-details`,
+        { method: "GET", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+      );
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem('admin_auth_token');
+          localStorage.removeItem("admin_auth_token");
           setAdminDetails(null);
         } else {
-          throw new Error(`API error: ${response.status} ${response.statusText}`);
+          throw new Error(
+            `API error: ${response.status} ${response.statusText}`
+          );
         }
       } else {
         const data = await response.json();
@@ -39,17 +36,13 @@ export const AdminAuthProvider = ({ children }) => {
       setIsLoading(false); // Mark loading as complete
     }
   };
-
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
-
     const initializeAdmin = async () => {
-      const token = localStorage.getItem('admin_auth_token');
-      
-      if (isMounted) {
-        await fetchAdminDetails(token);
-      }
+      const token = localStorage.getItem("admin_auth_token");
+
+      if (isMounted) { await fetchAdminDetails(token); }
     };
 
     initializeAdmin();

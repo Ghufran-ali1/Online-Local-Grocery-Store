@@ -162,7 +162,7 @@ function Footer() {
         </div>
       </footer>
       <p className="text-center mb-1">
-        © 2023 Ghufran Online Store. All rights reserved.
+        © 2025 Ghufran Online Store. All rights reserved.
       </p>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { AdminContext } from "../AdminContext";
+import { AdminContext } from "../context/AdminContext";
 import AppBreadcrumbs from "../components/Breadcrumbs";
 
 function AdminLoginPage() {

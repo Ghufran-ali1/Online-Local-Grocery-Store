@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { Link } from "react-router";
 import AppBreadcrumbs from "../components/Breadcrumbs";
 import axios from "axios";
-import { AdminContext } from "../AdminContext";
+import { AdminContext } from "../context/AdminContext";
 import { CircularProgress } from "@mui/material";
 import { GppBadOutlined } from "@mui/icons-material";
 

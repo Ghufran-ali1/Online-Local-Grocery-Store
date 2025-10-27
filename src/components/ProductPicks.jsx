@@ -241,7 +241,7 @@ function ProductPicks({
                     width={"100%"}
                     className="mb-2 object-fit-cover object-position-center p-2"
                     style={{
-                      aspectRatio: "1/1",
+                      aspectRatio: "1/.9",
                       objectFit: "cover",
                       objectPosition: "center",
                     }}
@@ -281,7 +281,7 @@ function ProductPicks({
                         }}
                       ></i>
                     </IconButton>
-                    <IconButton
+                    {/* <IconButton
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -302,7 +302,7 @@ function ProductPicks({
                             : "",
                         }}
                       ></i>
-                    </IconButton>
+                    </IconButton> */}
                   </div>
                 </div>
               </Link>

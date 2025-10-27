@@ -37,14 +37,15 @@ const style = {
   p: 2,
 };
 
-function Header() {  
+function Header() {
   const [open, setOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(false);
   const [searching, setSearching] = useState(false);
   const [openWatchlist, setOpenWatchlist] = useState(false);
-  const [openFavorites, setOpenFavorites] = useState(false);
+  const [openReservations, setOpenReservations] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [items, setItems] = useState(null);
+  const [reservedItems, setReservedItems] = useState(null);
   const [loading, setLoading] = useState(true);
   const [allCategories, setAllCategories] = useState([]);
   const [topCategories, setTopCategories] = useState([
@@ -63,35 +64,71 @@ function Header() {
   const [watchlistIdentifiers, setWatchlistIdentifiers] =
     useState(currentWatchList);
 
-  const storedFav = localStorage.getItem("favorites");
-  const currentFavs = storedFav ? JSON.parse(storedFav) : [];
-  const [favoritesIdentifiers, setFavoritestIdentifiers] =
-    useState(currentFavs);
-  const [favorites, setFavorites] = useState([]);
-
-
-  
-    useEffect(() => {
-      try {
-        fetch("https://grocery-store-server-theta.vercel.app/api/items")
-          .then((res) => {
-            if (!res.ok) throw new Error("Network response was not ok");
-            return res.json();
-          })
-          .then((data) => {
-            setItems(data);
-            setLoading(false);
-          })
-          .catch((error) => {
-            setLoading(false);
-          });
-      } catch (error) {
-        setLoading(false);
-      }
-    }, []);
-
+  const storedReserves = localStorage.getItem("reservations");
+  const currentReserves = storedReserves ? JSON.parse(storedReserves) : [];
+  const [reservationsIdentifiers, setReservationsIdentifiers] =
+    useState(currentReserves);
+  const [reservations, setReservations] = useState([]);
 
   useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const res = await fetch(
+          "https://grocery-store-server-theta.vercel.app/api/items"
+        );
+        if (!res.ok) throw new Error("Failed items fetch");
+        setItems(await res.json());
+      } catch (err) {
+        console.error(err);
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchReservations = async () => {
+      try {
+        const res = await fetch(
+          "https://grocery-store-server-theta.vercel.app/api/reservations"
+        );
+        if (!res.ok) throw new Error("Failed reservations fetch");
+        setReservedItems(await res.json());
+      } catch (err) {
+        console.error(err);
+        setReservedItems([]);
+      }
+    };
+
+    fetchItems();
+    fetchReservations();
+
+    const handleStorage = (e) => {
+      if (
+        (e.type === "storage" && e.key === "reservations") ||
+        e.type === "reservations-updated"
+      ) {
+        // ✅ when localStorage changes, fetch fresh from server
+        fetchReservations();
+      }
+    };
+
+    // ✅ watch both same-tab & cross-tab updates
+    window.addEventListener("reservations-updated", handleStorage);
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      window.removeEventListener("reservations-updated", handleStorage);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!items?.length || !reservedItems?.length) {
+      return;
+    }
+
+    let myReservations = [];
+
     const refreshLists = () => {
       const storedWatchlistIds = JSON.parse(
         localStorage.getItem("watchlist")
@@ -101,40 +138,48 @@ function Header() {
       );
       setWatchlist(mywatchlist || []);
 
-      const storedFavoriteIds = JSON.parse(
-        localStorage.getItem("favorites")
-      ) || ["STK645723076665", "STK476591134199"];
-      const favoritesList = items?.filter((item) =>
-        storedFavoriteIds.includes(item.store_no)
-      );
-      setFavorites(favoritesList || []);
+      const storedReservationIds =
+        JSON.parse(localStorage.getItem("reservations")) || [];
+
+      // merge reservations data with the item whose store no matches
+      myReservations = reservedItems
+        ?.filter((res) => storedReservationIds.includes(res.rsv_no)) // pick only reserved ones
+        .map((res) => {
+          const itemDetails = items?.find(
+            (item) => item.store_no === res.store_no
+          );
+          return itemDetails
+            ? { ...res, ...itemDetails, reserved_quantity: res.quantity }
+            : res;
+        });
+
+      setReservations(myReservations || []);
     };
 
     refreshLists();
 
     // ✅ 3. Same-tab changes (custom event) + cross-tab changes (native storage)
     const handleStorage = (e) => {
-      // If it's the native storage event but not one of our keys, ignore
       if (
         e.type === "storage" &&
         e.key &&
-        !["watchlist", "favorites"].includes(e.key)
+        !["watchlist", "reservations"].includes(e.key)
       )
         return;
       refreshLists();
     };
 
     window.addEventListener("watchlist-updated", handleStorage);
-    window.addEventListener("favorites-updated", handleStorage); // optional if you dispatch this too
+    window.addEventListener("reservations-updated", handleStorage);
     window.addEventListener("storage", handleStorage);
 
-    // ✅ 4. Clean up
+    // ✅ 4. Clean up event listeners on unmount
     return () => {
       window.removeEventListener("watchlist-updated", handleStorage);
-      window.removeEventListener("favorites-updated", handleStorage);
+      window.removeEventListener("reservations-updated", handleStorage);
       window.removeEventListener("storage", handleStorage);
     };
-  }, [items]);
+  }, [items, reservedItems]);
 
   useEffect(() => {
     if (items) {
@@ -153,10 +198,12 @@ function Header() {
     }
   }, [items]);
 
+  // Search functionality
   useEffect(() => {
     setSearching(true);
 
     if (search.trim() !== "" && items) {
+      // Filter items based on search query
       const searchResults = items.filter(
         (item) =>
           item.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -174,6 +221,7 @@ function Header() {
     }
   }, [search]);
 
+  // Drawer contents for Watchlist
   const DrawerList = (
     <Box sx={{ width: 450 }} role="presentation">
       <List className="p-0">
@@ -194,7 +242,7 @@ function Header() {
           <ListItem key={item.id} className="px-3">
             <div className="w-100 position-relative p-2 border rounded-3 mb-2 d-flex gap-2 align-items-center">
               <img
-                src={item.gallery[0]}
+                src={item?.gallery[0] || ""}
                 alt={item.name}
                 className="object-fit-cover me-2 object-position-center"
                 style={{ width: "150px", aspectRatio: "1/1" }}
@@ -220,25 +268,25 @@ function Header() {
                   >
                     Remove
                   </button>
-                  <IconButton
-                    onClick={() => handleAddFavorite(item.store_no)}
+                  {/* <IconButton
+                    onClick={() => handleAddReservation(item.store_no)}
                     className="position-relative rounded-pill"
-                    aria-label="favorites"
+                    aria-label="reservations"
                   >
                     <i
                       className={`bi ${
-                        favoritesIdentifiers?.includes(item?.store_no)
+                        reservationsIdentifiers?.includes(item?.store_no)
                           ? "bi-heart-fill"
                           : "bi-heart"
                       } small`}
                       style={{
                         lineHeight: "0",
-                        color: favoritesIdentifiers.includes(item?.store_no)
+                        color: reservationsIdentifiers?.includes(item?.store_no)
                           ? "red"
                           : "",
                       }}
                     ></i>
-                  </IconButton>
+                  </IconButton> */}
                 </div>
               </div>
             </div>
@@ -249,56 +297,69 @@ function Header() {
     </Box>
   );
 
-  const FavoritesDrawerList = (
+  // Drawer contents for Reservations
+  const ReservationsDrawerList = (
     <Box sx={{ width: 450 }} role="presentation">
       <List className="p-0">
         <div
           className="d-flex border-bottom p-3 position-sticky bg-white justify-content-between align-items-center mb-2"
           style={{ top: 0, zIndex: 10 }}
         >
-          <h5 className="mb-0 fw-bold">Favorites</h5>
+          <h5 className="mb-0 fw-bold">Reservations</h5>
           <IconButton
-            onClick={() => setOpenFavorites(false)}
+            onClick={() => setOpenReservations(false)}
             aria-label="close"
           >
             <CloseIcon />
           </IconButton>
         </div>
 
-        {favorites?.map((item) => (
-          <ListItem key={item.id} className="px-3">
+        {reservations?.map((item, index) => (
+          <ListItem key={index} className="px-3">
             <div className="w-100 position-relative p-2 border rounded-3 mb-2 d-flex gap-2 align-items-center">
               <img
-                src={item.gallery[0]}
-                alt={item.name}
-                className="object-fit-cover me-2 object-position-center"
+                src={item?.gallery?.[0] || null}
+                alt={item?.name}
+                className="object-fit-cover me-2 object-position-center p-1"
                 style={{ width: "150px", aspectRatio: "1/1" }}
               />
               <div className="w-100">
-                <Link to={`/store/${item.category}/${item.store_no}`}>
-                  <p className="fs-6 mb-0">{item.name}</p>
+                <div
+                  className="w-100 d-flex justify-content-end small"
+                  style={{ color: "var(--text-light)", lineHeight: 1 }}
+                >
+                  {new Date(item?.reserved_on).toLocaleString()}
+                </div>
+                <Link to={`/store/${item?.category}/${item?.store_no}`}>
+                  <p className="fs-6 mb-0">{item?.name}</p>
                 </Link>
                 <small style={{ color: "var(--text-light)" }}>
-                  {item.views} views | {item.quantity} remaining{" "}
+                  <span className="text-success">Reserved</span> | {item?.views}{" "}
+                  views | {item?.quantity} remaining{" "}
                 </small>
                 <div className="d-flex pt-0 small">
-                  {item.stock && (
+                  {/* {item.stock && (
                     <span className="text-success p-1 px-0 small">
                       In stock &nbsp; <i className="bi bi-check-circle"></i>
                     </span>
-                  )}
+                  )} */}
+
+                  <span className="text-success p-1 px-0 small">
+                    {item?.reserved_quantity || 0} items reserved &nbsp;{" "}
+                    <i className="bi bi-check-circle"></i>
+                  </span>
                 </div>
                 <div className="d-flex gap-2 align-items-center">
                   <button
-                    onClick={() => handleAddFavorite(item.store_no)}
+                    onClick={() => handleAddReservation(item.store_no)}
                     className="text-light w-100 rounded-3 p-1 px-3 bg-danger border-0 small"
                   >
-                    Remove
+                    Cancel reservation
                   </button>
                   <IconButton
                     onClick={() => handleAddWatchlist(item.store_no)}
                     className="position-relative rounded-pill"
-                    aria-label="favorites"
+                    aria-label="reservations"
                   >
                     <i
                       className={`bi ${
@@ -320,10 +381,14 @@ function Header() {
           </ListItem>
         ))}
       </List>
-      <p className="text-center py-3">{favorites?.length || 0} items found.</p>
+      <p className="text-center py-3">
+        {reservations.length > 0 ? reservations.length : "no"} reservations
+        found.
+      </p>
     </Box>
   );
 
+  // Drawer contents for Menu
   const menuDrawerList = (
     <Box sx={{ width: 400 }} role="presentation">
       <List className="p-0">
@@ -420,21 +485,21 @@ function Header() {
     window.dispatchEvent(new Event("watchlist-updated"));
   };
 
-  const handleAddFavorite = (store_no) => {
-    const stored = localStorage.getItem("favorites");
+  const handleAddReservation = (rsv_no) => {
+    const stored = localStorage.getItem("reservations");
     const current = stored ? JSON.parse(stored) : [];
 
     let updated;
-    if (!current.includes(store_no)) {
-      updated = [...current, store_no];
+    if (!current.includes(rsv_no)) {
+      updated = [...current, rsv_no];
     } else {
-      updated = current.filter((no) => no !== store_no);
+      updated = current.filter((no) => no !== rsv_no);
     }
 
-    setFavoritestIdentifiers(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
+    setReservationsIdentifiers(updated);
+    localStorage.setItem("reservations", JSON.stringify(updated));
 
-    window.dispatchEvent(new Event("favorites-updated"));
+    window.dispatchEvent(new Event("reservations-updated"));
   };
 
   return (
@@ -534,7 +599,7 @@ function Header() {
                             .toLowerCase()
                             .replace(/\s+/g, "-")}/${item.store_no}`}
                           key={item.id}
-                          onClick={()=> setOpen(false)}
+                          onClick={() => setOpen(false)}
                         >
                           <div className="border-bottom w-100 rounded-3 searchhover mb-2 p-1 px-2 mt-0 d-flex gap-2 align-items-center">
                             <img
@@ -597,11 +662,11 @@ function Header() {
       </SwipeableDrawer>
 
       <SwipeableDrawer
-        open={openFavorites}
+        open={openReservations}
         anchor="right"
-        onClose={() => setOpenFavorites(false)}
+        onClose={() => setOpenReservations(false)}
       >
-        {FavoritesDrawerList}
+        {ReservationsDrawerList}
       </SwipeableDrawer>
 
       <nav className="container d-flex justify-content-between align-items-center mx-auto">
@@ -611,14 +676,32 @@ function Header() {
 
         <ul className="list-unstyled mb-0 gap-3 d-none d-md-flex">
           <li>
-            <NavLink className={({ isActive }) => isActive ? "active" : ""} end to="/store">Store</NavLink>
+            <NavLink
+              className={({ isActive }) => (isActive ? "active" : "")}
+              end
+              to="/store"
+            >
+              Store
+            </NavLink>
           </li>
           <li>
-            <NavLink className={({ isActive }) => isActive ? "active" : ""} end to="/store/All Categories">All Categories</NavLink>
+            <NavLink
+              className={({ isActive }) => (isActive ? "active" : "")}
+              end
+              to="/store/All Categories"
+            >
+              All Categories
+            </NavLink>
           </li>
           {topCategories?.map((category) => (
             <li key={category}>
-              <NavLink className={({ isActive }) => isActive ? "active" : ""} end to={`/store/${category}`}>{category}</NavLink>
+              <NavLink
+                className={({ isActive }) => (isActive ? "active" : "")}
+                end
+                to={`/store/${category}`}
+              >
+                {category}
+              </NavLink>
             </li>
           ))}
         </ul>
@@ -626,7 +709,7 @@ function Header() {
           <IconButton
             onClick={() => setOpen(true)}
             className="position-relative rounded-pill"
-            aria-label="favorites"
+            aria-label="reservations"
           >
             <i className="bi bi-search" style={{ lineHeight: "0" }}></i>
           </IconButton>
@@ -644,16 +727,16 @@ function Header() {
             </Badge>
           </IconButton>
           <IconButton
-            onClick={() => setOpenFavorites(true)}
+            onClick={() => setOpenReservations(true)}
             className="position-relative rounded-pill"
-            aria-label="favorites"
+            aria-label="reservations"
           >
             <Badge
-              badgeContent={favorites?.length || 0}
+              badgeContent={reservations?.length || 0}
               color="error"
               overlap="circular"
             >
-              <i className="bi bi-heart" style={{ lineHeight: "0" }}></i>
+              <i className="bi bi-cart" style={{ lineHeight: "0" }}></i>
             </Badge>
           </IconButton>
           <IconButton

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { ProductContext } from "../ProductContext";
+import { ProductContext } from "../context/ProductContext";
 import { CircularProgress, IconButton } from "@mui/material";
 import ProductPicks from "../components/ProductPicks";
 import CallToAction from "../components/CallToAction";
@@ -35,13 +35,10 @@ function Product() {
   const [watchlistIdentifiers, setWatchlistIdentifiers] =
     useState(currentWatchList);
   const [open, setOpen] = useState({ state: false, store_no: null });
-  const storedFav = localStorage.getItem("favorites");
-  const currentFavs = storedFav ? JSON.parse(storedFav) : [];
-  const [favoritesIdentifiers, setFavoritesIdentifiers] = useState(currentFavs);
   const [newReservation, setNewReservation] = useState({
-    reserved_by: "",
-    email: "",
-    date: "",
+    reserved_by: "User Name",
+    email: "testuser@example.com",
+    date: new Date().toISOString().split("T")[0],
     quantity: 5,
   });
 
@@ -102,16 +99,13 @@ function Product() {
     window.dispatchEvent(new Event("watchlist-updated"));
   };
 
-  const handleAddFavorite = (store_no) => {
-    const stored = localStorage.getItem("favorites");
+  const handleAddReservation = (rsv_no) => {
+    const stored = localStorage.getItem("reservations");
     const current = stored ? JSON.parse(stored) : [];
-    const updated = current.includes(store_no)
-      ? current.filter((no) => no !== store_no)
-      : [...current, store_no];
+    const updated = [...current, rsv_no];
 
-    setFavoritesIdentifiers(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
-    window.dispatchEvent(new Event("favorites-updated"));
+    localStorage.setItem("reservations", JSON.stringify(updated));
+    window.dispatchEvent(new Event("reservations-updated"));
   };
 
   useEffect(() => {
@@ -158,8 +152,8 @@ function Product() {
       }),
     })
       .then((res) => res.json())
-      .then((data) => {
-        if (data.error) throw new Error(data.error);
+      .then((reservationData) => {
+        if (reservationData.error) throw new Error(reservationData.error);
 
         fetch(`https://grocery-store-server-theta.vercel.app/api/update-item`, {
           method: "PUT",
@@ -179,6 +173,9 @@ function Product() {
         })
           .then((res) => res.json())
           .then((data) => {
+            const reservationRecord = data.store_no + '-' + reservationData.data.rsv_no;
+            console.log('reservation data', reservationRecord);
+            handleAddReservation(reservationData.data.rsv_no);
             setProductDetails({
               ...productDetails,
               quantity:
@@ -426,26 +423,26 @@ function Product() {
                     ></i>{" "}
                     <span className="small">Watchlist</span>
                   </div>
-                  <div
+                  {/* <div
                     role="button"
                     className="px-1 d-flex justify-content-end align-items-center gap-2"
                     style={{
                       color:
-                        favoritesIdentifiers?.includes(
+                        reservationsIdentifiers?.includes(
                           productDetails?.store_no
                         ) && "red",
                     }}
-                    onClick={() => handleAddFavorite(productDetails?.store_no)}
+                    onClick={() => handleAddReservation(productDetails?.store_no)}
                   >
                     <i
                       className={
-                        favoritesIdentifiers.includes(productDetails?.store_no)
+                        reservationsIdentifiers.includes(productDetails?.store_no)
                           ? "bi bi-heart-fill fs-5"
                           : "bi bi-heart fs-5"
                       }
                     ></i>{" "}
                     <span>Favorite</span>
-                  </div>
+                  </div> */}
                 </div>
                 <h1 className="fw-semibold mb-3">{productDetails?.name}</h1>
                 <div className="mb-5 p-2 border bg-light">

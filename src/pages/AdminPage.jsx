@@ -3,7 +3,7 @@ import CategoriesTab from "../components/CategoriesTab";
 import { CircularProgress, TablePagination } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { AdminContext } from "../AdminContext";
+import { AdminContext } from "../context/AdminContext";
 import AppBreadcrumbs from "../components/Breadcrumbs";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
