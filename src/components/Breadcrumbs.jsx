@@ -53,7 +53,7 @@ export default function AppBreadcrumbs() {
     let raw = decodeURIComponent(pathnames[idx])
       .replace(/-/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
-    let display = raw; // what we render
+    let display = raw; // what is rendered
 
     if (idx === pathnames.length - 1 && productName) {
       raw = productName;
@@ -89,7 +89,7 @@ export default function AppBreadcrumbs() {
       const { adminDetails, setAdminDetails } = useContext(AdminContext);
 
       return adminDetails ? (
-        <div className="p-2 text-black d-flex gap-2 align-items-center">
+        <div className="p-2 d-flex gap-2 align-items-center">
           <span role="button" className="text-success px-1">
             <AccountCircleOutlined /> Logged in as {adminDetails.username}
           </span>{" "}
@@ -120,7 +120,7 @@ export default function AppBreadcrumbs() {
   return (
     <div className="container m-auto py-2 mb-2 d-flex justify-content-between">
       <Breadcrumbs
-        separator={<NavigateNextIcon fontSize="small" />}
+        separator={<NavigateNextIcon style={{ color: "var(--text-color)" }} fontSize="small" />}
         aria-label="breadcrumb"
         sx={{ my: 1 }}
       >

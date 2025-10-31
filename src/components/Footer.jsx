@@ -85,14 +85,14 @@ function Footer() {
               <Link
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 to="/"
-                className="text-decoration-none text-dark"
+                className="text-decoration-none"
               >
                 <li className="mb-2">Home</li>
               </Link>
               <Link
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 to="/store"
-                className="text-decoration-none text-dark"
+                className="text-decoration-none"
               >
                 <li className="mb-2">Store</li>
               </Link>
@@ -103,7 +103,7 @@ function Footer() {
                   }
                   key={category}
                   to={`/store/${category}`}
-                  className="text-decoration-none text-dark"
+                  className="text-decoration-none"
                 >
                   <li className="mb-2">{category}</li>
                 </Link>
@@ -131,11 +131,20 @@ function Footer() {
             }}
           >
             <div>
+              <label className="fw-semibold small">Name:</label>
+              <input
+                type="text"
+                className="form-control p-2 px-3 border-0 outline-0 shadow-none mt-1 mb-2"
+                style={{ backgroundColor: "var(--primary-light)", color: "var(--text-color)" }}
+                placeholder="Enter your name"
+              />
+            </div>
+            <div>
               <label className="fw-semibold small">Email address:</label>
               <input
                 type="email"
                 className="form-control p-2 px-3 border-0 outline-0 shadow-none mt-1 mb-2"
-                style={{ backgroundColor: "var(--primary-light)" }}
+                style={{ backgroundColor: "var(--primary-light)", color: "var(--text-color)" }}
                 placeholder="Enter your email"
               />
             </div>
@@ -143,7 +152,7 @@ function Footer() {
               <label className="fw-semibold small">Enter message:</label>
               <textarea
                 className="form-control p-2 border-0 outline-0 shadow-none mt-1 mb-2"
-                style={{ backgroundColor: "var(--primary-light)" }}
+                style={{ backgroundColor: "var(--primary-light)", color: "var(--text-color)" }}
                 placeholder="Enter your message"
                 rows={5}
               />
@@ -163,6 +172,9 @@ function Footer() {
       </footer>
       <p className="text-center mb-1">
         © 2025 Ghufran Online Store. All rights reserved.
+      </p>
+      <p className="text-center mb-1 text-muted small">
+        v1.0.0 - Developed by Ghufran Ahmad
       </p>
     </div>
   );

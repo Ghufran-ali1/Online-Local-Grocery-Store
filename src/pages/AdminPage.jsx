@@ -33,7 +33,7 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: "100%",
   maxWidth: 500,
-  bgcolor: "background.paper",
+  bgcolor: "var(--background-color)",
   boxShadow: 0,
   borderRadius: 4,
   p: 2,
@@ -44,7 +44,7 @@ const editStyle = {
   top: "100px",
   left: "50%",
   transform: "translate(-50%)",
-  bgcolor: "background.paper",
+  bgcolor: "var(--background-color)",
   boxShadow: 0,
   borderRadius: 4,
   p: 3,
@@ -119,10 +119,23 @@ function AdminPage() {
     "Redirecting ...",
   ];
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const openMenu = Boolean(anchorEl);
+  const [theme, setTheme] = useState(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme") || "light";
+    setTheme(saved);
+
+    const listener = () => {
+      // invert theme to get the new current value
+      setTheme(localStorage.getItem("theme") === "light" ? "dark" : "light");
+    };
+    window.addEventListener("themeChanged", listener);
+    return () => window.removeEventListener("themeChanged", listener);
+  }, []);
+
   const handleClickListItem = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -412,6 +425,7 @@ function AdminPage() {
       });
   }, []);
 
+  if (!theme) return null;
   return (
     <>
       <AppBreadcrumbs />
@@ -445,7 +459,7 @@ function AdminPage() {
                 Delete
               </button>
               <button
-                className="p-1 px-4 border border-black outline-0 bg-light text-dark rounded-3 small"
+                className="p-1 px-4 border-0 outline-0 bg-dark text-light rounded-3 small"
                 onClick={() => setOpen({ state: false, store_no: null })}
               >
                 Cancel
@@ -489,7 +503,11 @@ function AdminPage() {
                     src={editItemDetails?.gallery[0]}
                   />
                   <div className="w-100 p-1">
-                    <table className="table adminStoreItemDetails table-sm">
+                    <table
+                      className={`table  adminStoreItemDetails table-sm ${
+                        theme === "dark" ? "table-dark" : ""
+                      }`}
+                    >
                       <tbody>
                         <tr>
                           <th
@@ -511,8 +529,11 @@ function AdminPage() {
                           </th>
                           <td>
                             <input
-                              style={{ boxShadow: "none" }}
-                              className="form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
                               type="text"
                               value={editItemDetails?.name}
                               onChange={(e) =>
@@ -534,10 +555,13 @@ function AdminPage() {
                           </th>
                           <td>
                             <input
-                              style={{ boxShadow: "none" }}
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
                               list="categories-edit"
                               id="category-edit"
-                              className="form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
                               type="text"
                               value={editItemDetails?.category}
                               onChange={(e) =>
@@ -565,8 +589,11 @@ function AdminPage() {
                           </th>
                           <td>
                             <input
-                              style={{ boxShadow: "none" }}
-                              className="form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
                               type="text"
                               value={editItemDetails?.description}
                               onChange={(e) =>
@@ -588,8 +615,11 @@ function AdminPage() {
                           </th>
                           <td>
                             <input
-                              style={{ boxShadow: "none" }}
-                              className="form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
                               type="number"
                               value={editItemDetails?.quantity}
                               onChange={(e) =>
@@ -648,7 +678,7 @@ function AdminPage() {
                   <label className="form-label">Gallery/Images</label>
                   <input
                     type="file"
-                    className="form-control"
+                    className="form-control bg-transparent"
                     multiple
                     accept="image/*"
                     onChange={(e) => {
@@ -692,9 +722,13 @@ function AdminPage() {
                   backgroundColor:
                     JSON.stringify(editItemDetails) ===
                     JSON.stringify(editItemOriginalDetails)
-                      ? "var(--primary-light)"
+                      ? "transparent"
                       : "var(--primary-color)",
-                  border: "1px solid red",
+                  border:
+                    JSON.stringify(editItemDetails) ===
+                    JSON.stringify(editItemOriginalDetails)
+                      ? "1 px solid red"
+                      : "1px solid var(--primary-color)",
                   cursor:
                     JSON.stringify(editItemDetails) ===
                     JSON.stringify(editItemOriginalDetails)
@@ -710,7 +744,7 @@ function AdminPage() {
                 Save Changes
               </button>
               <button
-                className="p-1 px-4 border border-black outline-0 bg-light text-dark rounded-3 small"
+                className="p-1 px-4 border-0 outline-0 bg-dark text-light rounded-3 small"
                 onClick={() => setOpenEdit({ state: false, store_no: null })}
               >
                 Cancel
@@ -729,7 +763,10 @@ function AdminPage() {
         <div className="container m-auto min-vh-100">
           {(adminDetails?.role === "Manager" ||
             adminDetails?.role === "Executive") && (
-            <div className="border p-3 rounded-3 mb-3">
+            <div
+              className="p-3 rounded-3 mb-3 position-relative"
+              style={{ border: "1px dashed var(--text-light)" }}
+            >
               <div className="d-flex justify-content-between gap-2 align-items-center">
                 <h3 className="fw-bold">All Admins</h3>
                 <span className="d-flex gap-2 align-items-center">
@@ -739,10 +776,26 @@ function AdminPage() {
               </div>
 
               <AdminView admins={allAdmins} />
+              <div className="d-flex justify-content-center mt-2">
+                <Link to="/admin/signup">
+                  <button
+                    className="text-light border-0 text-uppercase outline-0 p-2 px-5 mt-3 rounded-pill small"
+                    style={{
+                      cursor: "pointer",
+                      backgroundColor: "var(--secondary-dark)",
+                    }}
+                  >
+                    Create New Admin
+                  </button>
+                </Link>
+              </div>
             </div>
           )}
 
-          <div className="border p-3 rounded-3 mb-3">
+          <div
+            className="p-3 rounded-3 mb-3"
+            style={{ border: "1px solid var(--text-light)" }}
+          >
             <div className="d-flex justify-content-between gap-2 align-items-center">
               <h3 className="fw-bold">All Categories</h3>
               <span className="d-flex gap-2 align-items-center">
@@ -754,7 +807,10 @@ function AdminPage() {
             <CategoriesTab items={items} />
           </div>
 
-          <div className="border p-3 rounded-3 mb-3">
+          <div
+            className="p-3 rounded-3 mb-3"
+            style={{ border: "1px solid var(--text-light)" }}
+          >
             <div className="d-flex justify-content-between gap-2 align-items-center">
               <h3 className="fw-bold">Reservations</h3>
               <span className="d-flex gap-2 align-items-center">
@@ -762,8 +818,10 @@ function AdminPage() {
                 items found
               </span>
             </div>
-            <div>
-              <table className="table">
+            <div className="table-responsive-custom">
+              <table
+                className={`table ${theme === "dark" ? "table-dark" : ""}`}
+              >
                 <thead>
                   <tr>
                     <th>No.</th>
@@ -806,7 +864,10 @@ function AdminPage() {
             </div>
           </div>
 
-          <div className="border p-3 rounded-3 mb-3">
+          <div
+            className="p-3 rounded-3 mb-3"
+            style={{ border: "1px solid var(--text-light)" }}
+          >
             <div className="d-flex mb-3 justify-content-between gap-2 align-items-center">
               <h3 className="fw-bold">Store Items</h3>
               <div className="d-flex align-items-center gap-3">
@@ -865,7 +926,8 @@ function AdminPage() {
                   {pagedItems?.map((item) => (
                     <div
                       key={item.id}
-                      className="border position-relative rounded-3 mb-3 shadow p-2 d-flex align-items-center flex-column flex-md-row gap-3"
+                      className="position-relative rounded-3 mb-3 shadow p-2 d-flex align-items-center flex-column flex-md-row gap-3"
+                      style={{ border: "1px solid var(--text-light)" }}
                     >
                       <div
                         className="position-absolute border-0 p-2 px-3 bg-transparent d-flex gap-2"
@@ -906,7 +968,7 @@ function AdminPage() {
                       </div>
                       <Link
                         className="hoverBorder"
-                        href={`/store/${item?.category}/${item?.store_no}`}
+                        to={`/store/${item?.category}/${item?.store_no}`}
                         target="_blank"
                       >
                         <img
@@ -917,7 +979,11 @@ function AdminPage() {
                         />
                       </Link>
                       <div className="w-100 p-1">
-                        <table className="table adminStoreItemDetails table-sm">
+                        <table
+                          className={`table  adminStoreItemDetails table-sm ${
+                            theme === "dark" ? "table-dark" : ""
+                          }`}
+                        >
                           <tbody>
                             <tr>
                               <th
@@ -997,19 +1063,25 @@ function AdminPage() {
                 onPageChange={handleChangePage}
                 rowsPerPage={rowsPerPage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
+                sx={{ color: "var(--text-color)" }}
               />
             </div>
           </div>
 
-          <div className="border p-3 rounded-3 mb-3">
+          <div
+            className="p-3 rounded-3 mb-3"
+            style={{ border: "1px solid var(--text-light)" }}
+          >
             <div className="d-flex justify-content-between gap-2 align-items-center">
               <h3 className="fw-bold">New Items</h3>
               <span className="d-flex gap-2 align-items-center">
                 <i className="bi bi-cart-plus fs-5"></i> 27 items found
               </span>
             </div>
-            <div>
-              <table className="table">
+            <div className="table-responsive-custom">
+              <table
+                className={`table ${theme === "dark" ? "table-dark" : ""}`}
+              >
                 <thead>
                   <tr>
                     <th>No.</th>
@@ -1028,8 +1100,11 @@ function AdminPage() {
 
                         <td>
                           <input
-                            style={{ boxShadow: "none" }}
-                            className="form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                            style={{
+                              boxShadow: "none",
+                              color: "var(--text-color)",
+                            }}
+                            className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
                             value={item.name}
                             placeholder="Enter name"
                             type="text"
@@ -1047,8 +1122,11 @@ function AdminPage() {
 
                         <td>
                           <input
-                            style={{ boxShadow: "none" }}
-                            className="form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                            style={{
+                              boxShadow: "none",
+                              color: "var(--text-color)",
+                            }}
+                            className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
                             value={item.category}
                             placeholder="Enter category"
                             id={`category${index}`}
@@ -1074,8 +1152,11 @@ function AdminPage() {
 
                         <td>
                           <input
-                            style={{ boxShadow: "none" }}
-                            className="form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                            style={{
+                              boxShadow: "none",
+                              color: "var(--text-color)",
+                            }}
+                            className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
                             value={item.description} // ✅ fixed typo
                             placeholder="Enter description"
                             type="text"
@@ -1093,8 +1174,11 @@ function AdminPage() {
 
                         <td>
                           <input
-                            style={{ boxShadow: "none" }}
-                            className="form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                            style={{
+                              boxShadow: "none",
+                              color: "var(--text-color)",
+                            }}
+                            className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
                             value={item.quantity}
                             placeholder="Enter quantity"
                             type="number"
@@ -1115,8 +1199,11 @@ function AdminPage() {
 
                         <td>
                           <input
-                            style={{ boxShadow: "none" }}
-                            className="form-control small m-0 outline-0"
+                            style={{
+                              boxShadow: "none",
+                              color: "var(--text-color)",
+                            }}
+                            className="form-control bg-transparent small m-0 outline-0"
                             type="file"
                             multiple
                             accept="image/*"
@@ -1151,14 +1238,14 @@ function AdminPage() {
 
                   {/* <tr>
                 <td>1</td>
-                <td><input style={{boxShadow: 'none'}} className='form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0' placeholder='Enter name' type='text' /></td>
-                <td><input style={{boxShadow: 'none'}} className='form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0' placeholder='Enter category' type='text' /></td>
-                <td><input style={{boxShadow: 'none'}} className='form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0' placeholder='Enter description' type='text' /></td>
-                <td><input style={{boxShadow: 'none'}} className='form-control p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0' placeholder='Enter quantity' type='number' /></td>
-                <td><input style={{boxShadow: 'none'}} className='form-control small m-0 outline-0' type='file' multiple /></td>
+                <td><input style={{boxShadow: 'none'}} className='form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0' placeholder='Enter name' type='text' /></td>
+                <td><input style={{boxShadow: 'none'}} className='form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0' placeholder='Enter category' type='text' /></td>
+                <td><input style={{boxShadow: 'none'}} className='form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0' placeholder='Enter description' type='text' /></td>
+                <td><input style={{boxShadow: 'none'}} className='form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0' placeholder='Enter quantity' type='number' /></td>
+                <td><input style={{boxShadow: 'none'}} className='form-control bg-transparent small m-0 outline-0' type='file' multiple /></td>
               </tr> */}
                   <tr>
-                    <td className="border" colSpan={6}>
+                    <td colSpan={6}>
                       <button
                         onClick={() =>
                           setNewItemArray((prev) => [
@@ -1174,13 +1261,14 @@ function AdminPage() {
                           ])
                         }
                         className="d-flex gap-2 border-0 outline-0 bg-transparent align-items-center"
+                        style={{ color: "var(--text-light)" }}
                       >
                         <i className="bi bi-plus-circle"></i>Add another
                       </button>
                     </td>
                   </tr>
                   <tr>
-                    <td className="border" colSpan={6}>
+                    <td colSpan={6}>
                       <div className="d-flex w-100 gap-4 justify-content-end">
                         <button
                           className="d-flex gap-2 border-0 outline-0 bg-transparent align-items-center text-danger"

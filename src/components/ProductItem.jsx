@@ -58,15 +58,17 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
         {/* {New && <button className='small p-1 px-2 border-0 outline-0 rounded-2' style={{ backgroundColor: '#FF8C00', color: 'white' }}>New 🔥</button>} */}
       </div>
       <div
-        className={`text-decoration-none bg-light item w-100 d-flex p-2 pt-3 pb-1 ${
+        className={`text-decoration-none item w-100 d-flex p-2 pt-3 pb-1 ${
           display === "grid" ? "flex-column" : "flex-row"
-        }  justify-content-start align-items-start border productItem`}
+        }  justify-content-start align-items-start shadow productItem`}
         style={{
           aspectRatio: display === "grid" && "1/1",
           scrollSnapType: "x mandatory",
           scrollSnapStop: "always",
           borderRadius: "8px",
           scrollSnapAlign: "start",
+          backgroundColor: "var(--background-color)",
+          border: "1px solid transparent",
         }}
       >
         <img
@@ -75,7 +77,7 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
           width={display === "grid" ? "100%" : "200px"}
           className="mb-2 object-fit-cover object-position-center p-2"
           style={{
-            aspectRatio: "1/.91",
+            aspectRatio: "1/.9",
             objectFit: "cover",
             objectPosition: "center",
           }}
@@ -85,12 +87,12 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
             <div className="fw-semibold m-0 p-0 fs-6 singleLineClamp">
               {ProductDetails?.name}
             </div>
-            <small className="singleLineClamp" style={{ color: "var(--text-light)" }}>
-              {ProductDetails?.quantity} Remaining | {ProductDetails?.description}
+            <small className="singleLineClamp mb-1 mt-1" style={{ color: "var(--text-light)", fontSize: '.6rem' }}>
+              {ProductDetails?.views} views | {ProductDetails?.quantity} remaining in stock
             </small>
-
-            {/* <div className='small mt-2'><strong>Description: </strong></div>
-                  <small style={{ color: 'var(--text-light)' }}>{ProductDetails?.description}</small> */}
+            <small className="singleLineClamp" style={{ color: "var(--text-light)" }}>
+              {ProductDetails?.description}
+            </small>
           </div>
           <div
             className="d-flex p-0 small gap-1 justify-content-end w-100"
@@ -115,7 +117,7 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
                   lineHeight: "0",
                   color: allWatchList.includes(ProductDetails?.store_no)
                     ? "var(--primary-color)"
-                    : "",
+                    : "var(--text-color)",
                 }}
               ></i>
             </IconButton>

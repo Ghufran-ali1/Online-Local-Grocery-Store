@@ -34,7 +34,7 @@ function AdminSignupPage() {
           email: formData.email,
           role: formData.role,
           created_by: adminDetails?.id || "self",
-          password: formData.password
+          password: formData.password,
         }
       );
 
@@ -48,7 +48,7 @@ function AdminSignupPage() {
       });
 
       setTimeout(() => {
-        window.location.href = '/admin/login';
+        window.location.href = "/admin/login";
       }, 3000);
     } catch (error) {
       let msg = "Signup failed. Please try again.";
@@ -87,146 +87,172 @@ function AdminSignupPage() {
     <>
       <AppBreadcrumbs />
       <div className="container m-auto pb-3">
-        <div className="border p-3 rounded-3 mb-3">
+        <div
+          className="p-3 rounded-3 mb-3"
+          style={{ border: "1px solid var(--text-light)" }}
+        >
           <h3 className="fw-semibold">NEW ADMINISTRATOR</h3>
           <div className="d-flex flex-column flex-lg-row gap-3">
             <div className="w-100">
-              {
-                isLoading ? <div className="d-flex flex-column gap-3 justify-content-center align-items-center py-5 text-muted">
-                          <CircularProgress size={25} />
-                          Authenticating ...
-                        </div> : adminDetails && adminDetails?.role === "Manager" || adminDetails?.role === "Executive" ? <>
-                          <form
-                            onSubmit={(e) => {
-                              e.preventDefault();
-                              handlesignup();
-                            }}
-                          >
-                            <div>
-                              <label htmlFor="username">Username</label>
-                              <input
-                                value={formData.username}
-                                onChange={(e) =>
-                                  setFormData({ ...formData, username: e.target.value })
-                                }
-                                className="w-100 mt-1 mb-3 border-0 p-2 px-3 rounded-2"
-                                style={{
-                                  outline: "none",
-                                  boxShadow: "none",
-                                  backgroundColor: "var(--primary-light)",
-                                }}
-                                type="text"
-                                id="username"
-                              />
-                            </div>
-                            <div>
-                              <label htmlFor="email">Email</label>
-                              <input
-                                value={formData.email}
-                                onChange={(e) =>
-                                  setFormData({ ...formData, email: e.target.value })
-                                }
-                                className="w-100 mt-1 mb-3 border-0 p-2 px-3 rounded-2"
-                                style={{
-                                  outline: "none",
-                                  boxShadow: "none",
-                                  backgroundColor: "var(--primary-light)",
-                                }}
-                                type="email"
-                                id="email"
-                              />
-                            </div>
-                            <div>
-                              <label htmlFor="role">Role</label>
-                              <select
-                                value={formData.role}
-                                onChange={(e) =>
-                                  setFormData({ ...formData, role: e.target.value })
-                                }
-                                className="w-100 mt-1 mb-3 border-0 p-3 px-3 rounded-2"
-                                style={{
-                                  outline: "none",
-                                  boxShadow: "none",
-                                  backgroundColor: "var(--primary-light)",
-                                }}
-                                type="text"
-                                id="role"
-                              >
-                                <option value="">Select Role</option>
-                                <option value="Executive">Executive</option>
-                                <option value="Manager">Manager</option>
-                                <option value="Staff">Staff</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label htmlFor="password">Password</label>
-                              <input
-                                value={formData.password}
-                                onChange={(e) =>
-                                  setFormData({ ...formData, password: e.target.value })
-                                }
-                                className="w-100 mt-1 mb-3 border-0 p-2 px-3 rounded-2"
-                                style={{
-                                  outline: "none",
-                                  boxShadow: "none",
-                                  backgroundColor: "var(--primary-light)",
-                                }}
-                                type="password"
-                                id="password"
-                              />
-                            </div>
-                            <div>
-                              <label htmlFor="confirm-password">Confirm Password</label>
-                              <input
-                                value={formData.confirmPassword}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    confirmPassword: e.target.value,
-                                  })
-                                }
-                                className="w-100 mt-1 mb-3 border-0 p-2 px-3 rounded-2"
-                                style={{
-                                  outline: "none",
-                                  boxShadow: "none",
-                                  backgroundColor: "var(--primary-light)",
-                                }}
-                                type="password"
-                                id="confirm-password"
-                              />
-                            </div>
-            
-                            {message !== "" && (
-                              <small
-                                className={`${
-                                  message.includes("successful")
-                                    ? "text-success"
-                                    : "text-danger"
-                                }`}
-                              >
-                                {message}
-                              </small>
-                            )}
-            
-                            <button
-                              id="submit"
-                              type="submit"
-                              className="text-light small border-0 outline-0 p-2 w-100 mt-3 rounded-pill"
-                              style={{
-                                cursor: "pointer",
-                                backgroundColor: "var(--secondary-dark)",
-                              }}
-                            >
-                              Signup Now
-                            </button>
-                          </form>
-                        </> : 
-        <div className="d-flex flex-column gap-2 justify-content-center align-items-center py-5 my-4 text-muted">
-          <GppBadOutlined fontSize="large" color="error" />
-          Access Denied!
-          <small className="text-muted">You must be logged in as an administrator to access this page.</small>
-        </div>
-              }
+              {isLoading ? (
+                <div className="d-flex flex-column gap-3 justify-content-center align-items-center py-5 text-muted">
+                  <CircularProgress size={25} />
+                  Authenticating ...
+                </div>
+              ) : (adminDetails && adminDetails?.role === "Manager") ||
+                adminDetails?.role === "Executive" ? (
+                <>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handlesignup();
+                    }}
+                  >
+                    <p style={{ color: "var(--text-light)" }}>
+                      Access Level: {adminDetails?.role}
+                    </p>
+                    <div>
+                      <label htmlFor="username">Username</label>
+                      <input
+                        value={formData.username}
+                        onChange={(e) =>
+                          setFormData({ ...formData, username: e.target.value })
+                        }
+                        className="w-100 mt-1 mb-3 border-0 p-2 px-3 rounded-2"
+                        style={{
+                          outline: "none",
+                          boxShadow: "none",
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--text-color)",
+                        }}
+                        type="text"
+                        id="username"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="email">Email</label>
+                      <input
+                        value={formData.email}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
+                        className="w-100 mt-1 mb-3 border-0 p-2 px-3 rounded-2"
+                        style={{
+                          outline: "none",
+                          boxShadow: "none",
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--text-color)",
+                        }}
+                        type="email"
+                        id="email"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="role">Role</label>
+                      <select
+                        value={formData.role}
+                        onChange={(e) =>
+                          setFormData({ ...formData, role: e.target.value })
+                        }
+                        className="w-100 mt-1 mb-3 border-0 p-3 px-3 rounded-2"
+                        style={{
+                          outline: "none",
+                          boxShadow: "none",
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--text-color)",
+                        }}
+                        type="text"
+                        id="role"
+                      >
+                        <option className="text-black" value="">
+                          Select Role
+                        </option>
+                        <option className="text-black" value="Executive">
+                          Executive
+                        </option>
+                        <option className="text-black" value="Manager">
+                          Manager
+                        </option>
+                        <option className="text-black" value="Staff">
+                          Staff
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label htmlFor="password">Password</label>
+                      <input
+                        value={formData.password}
+                        onChange={(e) =>
+                          setFormData({ ...formData, password: e.target.value })
+                        }
+                        className="w-100 mt-1 mb-3 border-0 p-2 px-3 rounded-2"
+                        style={{
+                          outline: "none",
+                          boxShadow: "none",
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--text-color)",
+                        }}
+                        type="password"
+                        id="password"
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="confirm-password">Confirm Password</label>
+                      <input
+                        value={formData.confirmPassword}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            confirmPassword: e.target.value,
+                          })
+                        }
+                        className="w-100 mt-1 mb-3 border-0 p-2 px-3 rounded-2"
+                        style={{
+                          outline: "none",
+                          boxShadow: "none",
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--text-color)",
+                        }}
+                        type="password"
+                        id="confirm-password"
+                      />
+                    </div>
+
+                    {message !== "" && (
+                      <small
+                        className={`${
+                          message.includes("successful")
+                            ? "text-success"
+                            : "text-danger"
+                        }`}
+                      >
+                        {message}
+                      </small>
+                    )}
+
+                    <button
+                      id="submit"
+                      type="submit"
+                      className="text-light small border-0 outline-0 p-2 w-100 mt-3 rounded-pill"
+                      style={{
+                        cursor: "pointer",
+                        backgroundColor: "var(--secondary-dark)",
+                      }}
+                    >
+                      Signup Now
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="d-flex flex-column gap-2 justify-content-center align-items-center py-5 my-4 text-muted">
+                  <GppBadOutlined fontSize="large" color="error" />
+                  Access Denied!
+                  <small className="text-muted">
+                    You must be logged in as an administrator to access this
+                    page.
+                  </small>
+                </div>
+              )}
             </div>
             <div className="w-100 d-flex justify-content-center align-items-center flex-column text-center p-3 gap-2">
               <h3>Login</h3>
