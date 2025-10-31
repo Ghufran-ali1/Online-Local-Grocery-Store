@@ -521,7 +521,7 @@ function Header() {
             {allCategories.map((category) => (
               <Link
                 onClick={() => setOpenMenu(false)}
-                to={`/store/${category.toLowerCase().replace(/\s+/g, "-")}`}
+                to={`/store/${category}`}
                 key={category}
               >
                 <ListItemButton sx={{ pl: 4 }} key={category}>
@@ -706,9 +706,7 @@ function Header() {
                           </strong>
                           {items.map((item) => (
                             <Link
-                              to={`/store/${item.category
-                                .toLowerCase()
-                                .replace(/\s+/g, "-")}/${item.store_no}`}
+                              to={`/store/${item.category}/${item.store_no}`}
                               key={item.id}
                               onClick={() => setOpen(false)}
                             >
