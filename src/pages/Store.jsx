@@ -153,7 +153,7 @@ function Store() {
                   aria-haspopup="true"
                   aria-expanded={open ? "true" : undefined}
                   style={{
-                    border:
+                    color:
                       sortBy === "Default Order"
                         ? "1px solid transparent"
                         : "1px solid var(--primary-color)",
