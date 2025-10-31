@@ -211,8 +211,8 @@ function Category() {
                   style={{
                     color:
                       sortBy === "Default Order"
-                        ? "1px solid transparent"
-                        : "1px solid var(--primary-color)",
+                        ? "var(--text-color)"
+                        : "var(--primary-color)",
                   }}
                 >
                   Sort by &nbsp;
@@ -383,6 +383,7 @@ function Category() {
               onPageChange={handleChangePage}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
+                sx={{ color: "var(--text-color)" }}
             />
           </div>
         </div>
