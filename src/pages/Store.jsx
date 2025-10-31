@@ -113,6 +113,12 @@ function Store() {
                       <Checkbox
                         checked={selectedDeals.includes(item)}
                         onChange={() => handleToggle(item)}
+                        sx={{
+                          color: "var(--text-color)",
+                          "&.Mui-checked": {
+                            color: "var(--primary-color)",
+                          },
+                        }}
                       />
                     }
                     label={item}
@@ -311,7 +317,7 @@ function Store() {
               onPageChange={handleChangePage}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
-                sx={{ color: "var(--text-color)" }}
+              sx={{ color: "var(--text-color)" }}
             />
           </div>
         </div>
