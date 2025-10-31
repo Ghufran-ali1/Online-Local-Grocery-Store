@@ -172,9 +172,8 @@ function Header() {
     let myReservations = [];
 
     const refreshLists = () => {
-      const storedWatchlistIds = JSON.parse(
-        localStorage.getItem("watchlist")
-      ) || [];
+      const storedWatchlistIds =
+        JSON.parse(localStorage.getItem("watchlist")) || [];
       const mywatchlist = items?.filter((item) =>
         storedWatchlistIds.includes(item.store_no)
       );
@@ -654,7 +653,7 @@ function Header() {
             <div
               className="p-3 pt-2 rounded-2"
               style={{
-                maxHeight: "700px",
+                maxHeight: "auto",
                 overflowY: "auto",
                 border: "1px solid var(--text-light)",
               }}
