@@ -26,15 +26,30 @@ import CategoryIcon from "@mui/icons-material/Category";
 
 const style = {
   position: "absolute",
-  top: "100px",
-  left: "50%",
-  transform: "translate(-50%)",
-  width: "100%",
-  maxWidth: 700,
-  bgcolor: "background.paper",
+  top: { xs: 0, sm: "100px" },
+  left: { xs: 0, sm: "50%" },
+  transform: { xs: "none", sm: "translateX(-50%)" },
+  width: { xs: "100vw", sm: "90%", md: "700px" },
+  minHeight: { xs: "100vh", sm: "auto" },
+  maxHeight: "100vh",
+  overflowY: "auto",
+  bgcolor: "var(--background-color)",
   boxShadow: 0,
-  borderRadius: 4,
+  borderRadius: { xs: 0, sm: 4 },
+  color: "var(--text-color)",
   p: 2,
+};
+
+// Determine initial user preferred theme
+const getInitialTheme = () => {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme) return savedTheme; // User has a saved preference
+
+  // No saved preference, check system preference
+  const systemPrefersDark = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  ).matches;
+  return systemPrefersDark ? "dark" : "light";
 };
 
 function Header() {
@@ -58,6 +73,7 @@ function Header() {
   const [searchResults, setSearchResults] = useState([]);
   const [search, setSearch] = useState("");
   const [watchlist, setWatchlist] = useState([]);
+  const [theme, setTheme] = useState(getInitialTheme);
 
   const stored = localStorage.getItem("watchlist");
   const currentWatchList = stored ? JSON.parse(stored) : [];
@@ -70,6 +86,32 @@ function Header() {
     useState(currentReserves);
   const [reservations, setReservations] = useState([]);
 
+  // Apply theme to document + listen for changes
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  // Sync with system theme only if user hasn't manually changed theme
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleChange = () => {
+      if (!localStorage.getItem("theme")) {
+        setTheme(mediaQuery.matches ? "dark" : "light");
+      }
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  // Toggle button
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+
+    window.dispatchEvent(new Event("themeChanged"));
+  };
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -132,7 +174,7 @@ function Header() {
     const refreshLists = () => {
       const storedWatchlistIds = JSON.parse(
         localStorage.getItem("watchlist")
-      ) || ["STK476591134199"];
+      ) || [];
       const mywatchlist = items?.filter((item) =>
         storedWatchlistIds.includes(item.store_no)
       );
@@ -223,16 +265,23 @@ function Header() {
 
   // Drawer contents for Watchlist
   const DrawerList = (
-    <Box sx={{ width: 450 }} role="presentation">
-      <List className="p-0">
+    <Box className="p-0" role="presentation">
+      <List className="p-0 m-0">
         <div
-          className="d-flex border-bottom p-3 position-sticky bg-white justify-content-between align-items-center mb-2"
-          style={{ top: 0, zIndex: 10 }}
+          className="d-flex border-bottom p-3 position-sticky justify-content-between align-items-center mb-2"
+          style={{
+            top: 0,
+            zIndex: 10,
+            backgroundColor: "var(--background-color)",
+          }}
         >
-          <h5 className="mb-0 fw-bold">Watchlist</h5>
+          <h5 className="mb-0 fw-bold" style={{ color: "var(--text-color)" }}>
+            Watchlist
+          </h5>
           <IconButton
             onClick={() => setOpenWatchlist(false)}
             aria-label="close"
+            sx={{ color: "var(--text-color)" }}
           >
             <CloseIcon />
           </IconButton>
@@ -240,12 +289,15 @@ function Header() {
 
         {watchlist?.map((item) => (
           <ListItem key={item.id} className="px-3">
-            <div className="w-100 position-relative p-2 border rounded-3 mb-2 d-flex gap-2 align-items-center">
+            <div
+              className="w-100 position-relative p-2 rounded-3 mb-2 d-flex gap-2 align-items-center"
+              style={{ border: "1px solid var(--text-light)" }}
+            >
               <img
                 src={item?.gallery[0] || ""}
                 alt={item.name}
                 className="object-fit-cover me-2 object-position-center"
-                style={{ width: "150px", aspectRatio: "1/1" }}
+                style={{ width: "35%", aspectRatio: "1/1" }}
               />
               <div className="w-100">
                 <Link to={`/store/${item.category}/${item.store_no}`}>
@@ -299,16 +351,23 @@ function Header() {
 
   // Drawer contents for Reservations
   const ReservationsDrawerList = (
-    <Box sx={{ width: 450 }} role="presentation">
+    <Box className="p-0" role="presentation">
       <List className="p-0">
         <div
-          className="d-flex border-bottom p-3 position-sticky bg-white justify-content-between align-items-center mb-2"
-          style={{ top: 0, zIndex: 10 }}
+          className="d-flex border-bottom p-3 position-sticky justify-content-between align-items-center mb-2"
+          style={{
+            top: 0,
+            zIndex: 10,
+            backgroundColor: "var(--background-color)",
+          }}
         >
-          <h5 className="mb-0 fw-bold">Reservations</h5>
+          <h5 className="mb-0 fw-bold" style={{ color: "var(--text-color)" }}>
+            Reservations
+          </h5>
           <IconButton
             onClick={() => setOpenReservations(false)}
             aria-label="close"
+            sx={{ color: "var(--text-color)" }}
           >
             <CloseIcon />
           </IconButton>
@@ -316,7 +375,10 @@ function Header() {
 
         {reservations?.map((item, index) => (
           <ListItem key={index} className="px-3">
-            <div className="w-100 position-relative p-2 border rounded-3 mb-2 d-flex gap-2 align-items-center">
+            <div
+              className="w-100 position-relative p-2 rounded-3 mb-2 d-flex gap-2 align-items-center"
+              style={{ border: "1px solid var(--text-light)" }}
+            >
               <img
                 src={item?.gallery?.[0] || null}
                 alt={item?.name}
@@ -390,14 +452,24 @@ function Header() {
 
   // Drawer contents for Menu
   const menuDrawerList = (
-    <Box sx={{ width: 400 }} role="presentation">
+    <Box className="p-0" role="presentation">
       <List className="p-0">
         <div
-          className="d-flex border-bottom p-3 position-sticky bg-white justify-content-between align-items-center mb-2"
-          style={{ top: 0, zIndex: 10 }}
+          className="d-flex border-bottom p-3 position-sticky justify-content-between align-items-center mb-2"
+          style={{
+            top: 0,
+            zIndex: 10,
+            backgroundColor: "var(--background-color)",
+          }}
         >
-          <h5 className="mb-0 fw-bold">Menu</h5>
-          <IconButton onClick={() => setOpenMenu(false)} aria-label="close">
+          <h5 className="mb-0 fw-bold" style={{ color: "var(--text-color)" }}>
+            Menu
+          </h5>
+          <IconButton
+            onClick={() => setOpenMenu(false)}
+            aria-label="close"
+            sx={{ color: "var(--text-color)" }}
+          >
             <CloseIcon />
           </IconButton>
         </div>
@@ -410,7 +482,7 @@ function Header() {
         >
           <ListItemButton>
             <ListItemIcon>
-              <HomeOutlined />
+              <HomeOutlined sx={{ color: "var(--text-color)" }} />
             </ListItemIcon>
             <ListItemText primary="Home" />
           </ListItemButton>
@@ -424,7 +496,7 @@ function Header() {
         >
           <ListItemButton>
             <ListItemIcon>
-              <ShoppingCartCheckoutIcon color="inherit" />
+              <ShoppingCartCheckoutIcon sx={{ color: "var(--text-color)" }} />
             </ListItemIcon>
             <ListItemText primary="Store" />
           </ListItemButton>
@@ -432,7 +504,7 @@ function Header() {
 
         <ListItemButton onClick={() => setOpenDropdown(!openDropdown)}>
           <ListItemIcon>
-            <FormatListBulletedIcon />
+            <FormatListBulletedIcon sx={{ color: "var(--text-color)" }} />
           </ListItemIcon>
           <ListItemText primary="Categories" />
           {openDropdown ? <ExpandLess /> : <ExpandMore />}
@@ -442,7 +514,7 @@ function Header() {
             <Link to={`/store/All Categories`} key={"All Categories"}>
               <ListItemButton sx={{ pl: 4 }}>
                 <ListItemIcon>
-                  <CategoryIcon />
+                  <CategoryIcon sx={{ color: "var(--text-color)" }} />
                 </ListItemIcon>
                 <ListItemText primary={"All Categories"} />
               </ListItemButton>
@@ -455,7 +527,7 @@ function Header() {
               >
                 <ListItemButton sx={{ pl: 4 }} key={category}>
                   <ListItemIcon>
-                    <CategoryIcon />
+                    <CategoryIcon sx={{ color: "var(--text-color)" }} />
                   </ListItemIcon>
                   <ListItemText primary={category} />
                 </ListItemButton>
@@ -463,6 +535,23 @@ function Header() {
             ))}
           </List>
         </Collapse>
+
+        <div
+          role="button"
+          className="d-flex gap-2 align-items-center px-2 p-2 px-3 my-3 cursor-pointer d-flex justify-content-between flex-row-reverse"
+          onClick={() => {
+            toggleTheme();
+          }}
+          style={{ backgroundColor: "var(--background-light)" }}
+        >
+          <i
+            className={`bi ${
+              theme === "dark" ? "bi-sun" : "bi-moon-stars-fill"
+            } me-1 fs-5`}
+            style={{ lineHeight: 0 }}
+          ></i>
+          Switch to {theme === "dark" ? "Light" : "Dark"} Mode
+        </div>
       </List>
       <p className="text-center py-3">&copy; All rights reserved 2025</p>
     </Box>
@@ -535,12 +624,24 @@ function Header() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 type="text"
-                placeholder="Search for products..."
+                placeholder="Search for products ..."
                 className="p-2 pt-1 border-0 outline-0"
                 fullWidth
                 variant="standard"
+                color="primary"
                 InputProps={{
                   disableUnderline: true,
+                  sx: {
+                    color: "var(--text-color)", // input text
+                    "&::placeholder": {
+                      color: "var(--text-light)",
+                      opacity: 1, // full opacity
+                    },
+                    "& .MuiInputBase-input::placeholder": {
+                      color: "var(--text-light)",
+                      opacity: 1,
+                    },
+                  },
                 }}
               />
               <i
@@ -551,95 +652,117 @@ function Header() {
               ></i>
             </form>
             <div
-              className="p-3 pt-2 border rounded-2"
-              style={{ maxHeight: "700px", overflowY: "auto" }}
+              className="p-3 pt-2 rounded-2"
+              style={{
+                maxHeight: "700px",
+                overflowY: "auto",
+                border: "1px solid var(--text-light)",
+              }}
             >
-              {search.trim() !== "" && (
-                <h6 className="m-0" style={{ color: "var(--primary-light)" }}>
-                  Search results for <strong>"{search}"</strong>
-                </h6>
-              )}
-              <div>
-                {searching ? (
-                  [...Array(6)].map((_, index) => (
-                    <div
-                      key={index}
-                      className="border-bottom w-100 rounded-3 mb-2 p-1 px-2 mt-0"
-                    >
-                      <p className="m-0 mb-1 fw-semibold">
-                        <span className="placeholder rounded-2 col-4 placeholder-glow"></span>
-                      </p>
-                      <small style={{ color: "var(--text-light)" }}>
-                        <span className="placeholder rounded-1 col-3 placeholder-glow"></span>{" "}
-                        |{" "}
-                        <span className="placeholder rounded-1 col-2 placeholder-glow"></span>{" "}
-                        |{" "}
-                        <span className="placeholder rounded-1 col-2 placeholder-glow"></span>
-                      </small>
-                    </div>
-                  ))
-                ) : searchResults && searchResults.length > 0 ? (
-                  Object.entries(
-                    searchResults.reduce((acc, item) => {
-                      acc[item.category] = acc[item.category] || [];
-                      acc[item.category].push(item);
-                      return acc;
-                    }, {})
-                  ).map(([category, items]) => (
-                    <div key={category} className="mb-3">
-                      <strong
-                        className="d-block mb-1 mt-3 text-uppercase"
-                        style={{ color: "var(--text-light)" }}
-                      >
-                        {category}
-                      </strong>
-                      {items.map((item) => (
-                        <Link
-                          to={`/store/${item.category
-                            .toLowerCase()
-                            .replace(/\s+/g, "-")}/${item.store_no}`}
-                          key={item.id}
-                          onClick={() => setOpen(false)}
-                        >
-                          <div className="border-bottom w-100 rounded-3 searchhover mb-2 p-1 px-2 mt-0 d-flex gap-2 align-items-center">
-                            <img
-                              src={item.gallery[0]}
-                              alt={""}
-                              className="p-1 bg-light"
-                              style={{
-                                width: "70px",
-                                aspectRatio: "1/1",
-                                objectFit: "cover",
-                                borderRadius: "8px",
-                                objectPosition: "center",
-                              }}
-                            />
+              {search.trim() !== "" ? (
+                <>
+                  <h6
+                    className="m-0 fw-semibold mt-1 mb-2"
+                    style={{ color: "var(--text-light)" }}
+                  >
+                    Search results for <strong>"{search}"</strong>
+                  </h6>
 
-                            <div>
-                              <p className="m-0 mb-1 fw-semibold">
-                                {item.name}
-                              </p>
-                              <small style={{ color: "var(--text-light)" }}>
-                                {item.quantity} Remaining |{" "}
-                                {item.stock && (
-                                  <span className="text-success">
-                                    In stock{" "}
-                                    <i className="bi bi-check-circle"></i>
-                                  </span>
-                                )}
-                              </small>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center p-3 text-danger">
-                    No results found!
-                  </p>
-                )}
-              </div>
+                  <div>
+                    {searching ? (
+                      [...Array(6)].map((_, index) => (
+                        <div
+                          key={index}
+                          className="w-100 rounded-3 mb-2 p-1 px-2 mt-0"
+                          style={{
+                            borderBottom: "1px solid var(--text-light)",
+                          }}
+                        >
+                          <p className="m-0 mb-1 fw-semibold">
+                            <span className="placeholder rounded-2 col-4 placeholder-glow"></span>
+                          </p>
+                          <small style={{ color: "var(--text-light)" }}>
+                            <span className="placeholder rounded-1 col-3 placeholder-glow"></span>{" "}
+                            |{" "}
+                            <span className="placeholder rounded-1 col-2 placeholder-glow"></span>{" "}
+                            |{" "}
+                            <span className="placeholder rounded-1 col-2 placeholder-glow"></span>
+                          </small>
+                        </div>
+                      ))
+                    ) : searchResults && searchResults.length > 0 ? (
+                      Object.entries(
+                        searchResults.reduce((acc, item) => {
+                          acc[item.category] = acc[item.category] || [];
+                          acc[item.category].push(item);
+                          return acc;
+                        }, {})
+                      ).map(([category, items]) => (
+                        <div key={category} className="mb-3">
+                          <strong
+                            className="d-block mb-1 mt-3 text-uppercase"
+                            style={{ color: "var(--text-light)" }}
+                          >
+                            {category}
+                          </strong>
+                          {items.map((item) => (
+                            <Link
+                              to={`/store/${item.category
+                                .toLowerCase()
+                                .replace(/\s+/g, "-")}/${item.store_no}`}
+                              key={item.id}
+                              onClick={() => setOpen(false)}
+                            >
+                              <div
+                                className="w-100 rounded-3 searchhover mb-2 p-1 px-2 mt-0 d-flex gap-2 align-items-center"
+                                style={{
+                                  borderBottom: "1px solid var(--text-light)",
+                                }}
+                              >
+                                <img
+                                  src={item.gallery[0]}
+                                  alt={""}
+                                  className="p-1 bg-light"
+                                  style={{
+                                    width: "70px",
+                                    aspectRatio: "1/1",
+                                    objectFit: "cover",
+                                    borderRadius: "8px",
+                                    objectPosition: "center",
+                                  }}
+                                />
+
+                                <div>
+                                  <p className="m-0 mb-1 fw-semibold">
+                                    {item.name}
+                                  </p>
+                                  <small style={{ color: "var(--text-light)" }}>
+                                    {item.quantity} Remaining |{" "}
+                                    {item.stock && (
+                                      <span className="text-success">
+                                        In stock{" "}
+                                        <i className="bi bi-check-circle"></i>
+                                      </span>
+                                    )}
+                                  </small>
+                                </div>
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center p-5 mt-2 text-danger">
+                        No results found!
+                      </p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p className="text-center p-5 mt-2 text-info">
+                  Type something to start searching!
+                </p>
+              )}
             </div>
           </Box>
         </Fade>
@@ -649,6 +772,14 @@ function Header() {
         open={openMenu}
         anchor="right"
         onClose={() => setOpenMenu(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "var(--background-color)",
+            color: "var(--text-color)",
+            padding: 0,
+            width: { xs: "100vw", sm: "450px" },
+          },
+        }}
       >
         {menuDrawerList}
       </SwipeableDrawer>
@@ -657,6 +788,14 @@ function Header() {
         open={openWatchlist}
         anchor="right"
         onClose={() => setOpenWatchlist(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "var(--background-color)",
+            color: "var(--text-color)",
+            padding: 0,
+            width: { xs: "100vw", sm: "550px" },
+          },
+        }}
       >
         {DrawerList}
       </SwipeableDrawer>
@@ -665,6 +804,14 @@ function Header() {
         open={openReservations}
         anchor="right"
         onClose={() => setOpenReservations(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "var(--background-color)",
+            color: "var(--text-color)",
+            padding: 0,
+            width: { xs: "100vw", sm: "550px" },
+          },
+        }}
       >
         {ReservationsDrawerList}
       </SwipeableDrawer>
@@ -710,6 +857,7 @@ function Header() {
             onClick={() => setOpen(true)}
             className="position-relative rounded-pill"
             aria-label="reservations"
+            style={{ color: "var(--text-color)" }}
           >
             <i className="bi bi-search" style={{ lineHeight: "0" }}></i>
           </IconButton>
@@ -717,6 +865,7 @@ function Header() {
             onClick={() => setOpenWatchlist(true)}
             className="position-relative rounded-pill"
             aria-label="watchlist"
+            style={{ color: "var(--text-color)" }}
           >
             <Badge
               badgeContent={watchlist?.length || 0}
@@ -730,6 +879,7 @@ function Header() {
             onClick={() => setOpenReservations(true)}
             className="position-relative rounded-pill"
             aria-label="reservations"
+            style={{ color: "var(--text-color)" }}
           >
             <Badge
               badgeContent={reservations?.length || 0}
@@ -739,10 +889,26 @@ function Header() {
               <i className="bi bi-cart" style={{ lineHeight: "0" }}></i>
             </Badge>
           </IconButton>
+          <div
+            role="button"
+            className="d-flex gap-2 rounded-3 align-items-center px-2 p-1 mx-1 cursor-pointer d-none d-md-flex"
+            onClick={() => {
+              toggleTheme();
+            }}
+          >
+            <i
+              className={`bi ${
+                theme === "dark" ? "bi-sun" : "bi-moon-stars-fill"
+              } me-1 fs-5`}
+              style={{ lineHeight: 0 }}
+            ></i>
+            {theme === "dark" ? "Light" : "Dark"} Mode
+          </div>
           <IconButton
             onClick={() => setOpenMenu(true)}
             className="position-relative rounded-pill d-md-none"
             aria-label="menu"
+            style={{ color: "var(--text-color)" }}
           >
             <i className="bi bi-list" style={{ lineHeight: "0" }}></i>
           </IconButton>

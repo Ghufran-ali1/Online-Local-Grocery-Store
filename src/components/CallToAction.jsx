@@ -7,7 +7,8 @@ function CallToAction() {
       className="mt-3 mb-4 text-center py-5"
       style={{ backgroundColor: "var(--primary-light)" }}
     >
-      <p>Our Online grocery store is Now Open!</p>
+      {/* <p>Our Online grocery store is Now Open!</p> */}
+      <p>Our Online grocery store is Openning Soon!</p>
       <Link to={"/store"}>
         <button
           type="submit"
@@ -20,7 +21,8 @@ function CallToAction() {
             window.scrollTo(0, 0, { behavior: "smooth" });
           }}
         >
-          Start Shopping
+          {/* Start Shopping */}
+          View Inventory
         </button>
       </Link>
     </div>

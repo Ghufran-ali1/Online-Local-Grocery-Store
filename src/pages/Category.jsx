@@ -286,7 +286,6 @@ function Category() {
               <div
                 className="d-grid gap-3 justify-content-start"
                 style={{
-                  // 👉 gridTemplateColumns collapses to 1 column for list view
                   gridTemplateColumns:
                     view === "grid" ? `repeat(${columnCount}, 1fr)` : "1fr",
                 }}

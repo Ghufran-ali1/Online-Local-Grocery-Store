@@ -93,7 +93,7 @@ function HomePage() {
                 and household items, we have everything you need delivered right
                 to your doorstep.
               </p>
-              <Link href="/store">
+              <Link to="/store">
                 <button
                   className="text-light mt-2 p-2 px-5 d-flex justify-content-center rounded-pill border-0 outline-0 align-items-center"
                   style={{ backgroundColor: "var(--primary-color)" }}
@@ -118,9 +118,12 @@ function HomePage() {
         <h4 className="container mt-5 fw-bold">Top Categories</h4>
         <CategoriesTab items={items} isTopCategories={[true]} />
 
-        <div className="d-flex flex-column gap-4 p-3 bg-light flex-md-row">
+        <div
+          className="d-flex flex-column gap-4 p-3 py-4 flex-md-row"
+          style={{ backgroundColor: "var(--background-light)" }}
+        >
           <div
-            className="bg-white p-0 w-100 rounded-5 overflow-hidden border"
+            className="p-0 w-100 rounded-5 overflow-hidden border"
             style={{
               aspectRatio: "3/4",
               color: "var(--background-color)",
@@ -128,6 +131,7 @@ function HomePage() {
               backgroundPosition: "center",
               backgroundSize: "cover",
               backgroundRepeat: "no-repeat",
+              backgroundColor: "var(--background-light)",
             }}
           >
             <div
@@ -139,7 +143,9 @@ function HomePage() {
             >
               <Link to={"/store"} className="h-100 w-100">
                 <p className="text-light">Convenience</p>
-                <h2 className="fw-bold">Shop at your convenience.</h2>
+                <h2 className="fw-bold text-light">
+                  Shop at your convenience.
+                </h2>
                 <button className="border-primary border-0 p-0 px-3 text-primary bg-transparent border-bottom">
                   Shop Now
                 </button>
@@ -148,7 +154,7 @@ function HomePage() {
           </div>
 
           <div
-            className="bg-white p-0 w-100 rounded-5 overflow-hidden border"
+            className="p-0 w-100 rounded-5 overflow-hidden border"
             style={{
               aspectRatio: "3/4",
               color: "var(--background-color)",
@@ -167,7 +173,9 @@ function HomePage() {
             >
               <Link to={"/store"} className="h-100 w-100">
                 <p className="text-light">Speed</p>
-                <h2 className="fw-bold">Save your time. Shop wisely.</h2>
+                <h2 className="fw-bold text-light">
+                  Save your time. Shop wisely.
+                </h2>
                 <button className="border-primary border-0 p-0 px-3 text-primary bg-transparent border-bottom">
                   Shop Now
                 </button>
@@ -176,7 +184,7 @@ function HomePage() {
           </div>
 
           <div
-            className="bg-white p-0 w-100 rounded-5 overflow-hidden border"
+            className="p-0 w-100 rounded-5 overflow-hidden border"
             style={{
               aspectRatio: "3/4",
               color: "var(--background-color)",
@@ -195,7 +203,9 @@ function HomePage() {
             >
               <Link to={"/store"} className="h-100 w-100">
                 <p className="text-light">Great Deals</p>
-                <h2 className="fw-bold">Get amazing offers on all items.</h2>
+                <h2 className="fw-bold text-light">
+                  Get amazing offers on all items.
+                </h2>
                 <button className="border-primary border-0 p-0 px-3 text-primary bg-transparent border-bottom">
                   Shop Now
                 </button>
@@ -210,7 +220,7 @@ function HomePage() {
         <h4 className="container mt-5 fw-bold">New Arrivals 🔥</h4>
         <ProductPicks items={items} loading={loading} New={true} />
 
-        <div className="d-flex flex-column gap-4 p-3 bg-light flex-md-row">
+        <div className="d-flex flex-column gap-4 p-3 flex-md-row">
           <div
             className="bg-white p-0 w-100 rounded-5 overflow-hidden border"
             style={{
@@ -220,6 +230,7 @@ function HomePage() {
               backgroundPosition: "right",
               backgroundSize: "cover",
               backgroundRepeat: "no-repeat",
+              backgroundColor: "var(--background-light)",
             }}
           >
             <div
@@ -230,8 +241,10 @@ function HomePage() {
               }}
             >
               <Link to={"/store/Fruits"} className="h-100 w-100">
-                <p>WE CARE FOR YOU!</p>
-                <h2 className="fw-bold">Your health matters to us!</h2>
+                <p className="text-light">WE CARE FOR YOU!</p>
+                <h2 className="fw-bold text-light">
+                  Your health matters to us!
+                </h2>
                 <button className="border-primary border-0 p-0 px-3 text-primary bg-transparent border-bottom">
                   Shop Now
                 </button>
@@ -257,9 +270,9 @@ function HomePage() {
                     (i) => i.category === "Fruits" || i.category === "Produce"
                   )
                   .slice(0, 4)
-                  .map((item) => (
+                  .map((item, index) => (
                     <Link
-                      key={item?.id}
+                      key={index}
                       to={`/store/${item?.category}/${item?.store_no}`}
                       onClick={() => window.scrollTo(0, 0)}
                       className="text-decoration-none position-relative d-block"
@@ -270,11 +283,12 @@ function HomePage() {
                     >
                       {/* Card: flex column that fills grid cell */}
                       <div
-                        className="bg-light border rounded-3 d-flex flex-column h-100"
+                        className="border rounded-3 d-flex flex-column h-100"
                         style={{
                           padding: 0,
                           overflow: "hidden",
                           boxSizing: "border-box",
+                          backgroundColor: "var(--background-light)",
                         }}
                       >
                         {/* Image area (fills remaining space without overflowing) */}
@@ -298,9 +312,24 @@ function HomePage() {
                         </div>
                         {/* Top header (fixed height) */}
                         <div className="px-3 py-2" style={{ flex: "0 0 60px" }}>
-                          <div className="fw-semibold mb-1">{item?.name}</div>
-                          <small className="text-muted">
-                            {item?.quantity} Remaining
+                          <div className="fw-semibold m-0 p-0 fs-6 singleLineClamp">
+                            {item?.name}
+                          </div>
+                          <small
+                            className="singleLineClamp mb-1 mt-1"
+                            style={{
+                              color: "var(--text-light)",
+                              fontSize: ".6rem",
+                            }}
+                          >
+                            {item?.views} views | {item?.quantity} remaining in
+                            stock
+                          </small>
+                          <small
+                            className="singleLineClamp"
+                            style={{ color: "var(--text-light)" }}
+                          >
+                            {item?.description}
                           </small>
                         </div>
 
@@ -317,11 +346,17 @@ function HomePage() {
                             }}
                           >
                             <i
-                              className={`bi ${
+                              className={`bi fs-5 ${
                                 allWatchList.includes(item?.store_no)
-                                  ? "bi-eye-fill text-primary"
+                                  ? "bi-eye-fill"
                                   : "bi-eye"
                               }`}
+                              style={{
+                                lineHeight: "0",
+                                color: allWatchList.includes(item?.store_no)
+                                  ? "var(--primary-color)"
+                                  : "var(--text-color)",
+                              }}
                             />
                           </button>
                         </div>
@@ -339,11 +374,12 @@ function HomePage() {
                   >
                     {/* Card container */}
                     <div
-                      className="bg-light border rounded-3 d-flex flex-column h-100"
+                      className="border rounded-3 d-flex flex-column h-100"
                       style={{
                         padding: 0,
                         overflow: "hidden",
                         boxSizing: "border-box",
+                        backgroundColor: "var(--background-light)",
                       }}
                     >
                       {/* Image placeholder */}

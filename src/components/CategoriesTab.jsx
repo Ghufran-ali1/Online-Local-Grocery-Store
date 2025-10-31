@@ -165,7 +165,7 @@ function CategoriesTab({ items, activeTab = null, isTopCategories = false }) {
               className="mb-2 object-fit-cover object-position-center p-3"
               style={{ aspectRatio: "1/1" }}
             />
-            <div className="3 text-black">All Categories</div>
+            <div className="">All Categories</div>
           </Link>
         )}
         {((isTopCategories ? topCategories : allCategories) || topCategories)
@@ -201,7 +201,7 @@ function CategoriesTab({ items, activeTab = null, isTopCategories = false }) {
                   className="mb-2 object-fit-cover object-position-center p-2"
                   style={{ aspectRatio: "1/1" }}
                 />
-                <div className="3 text-black">{category}</div>
+                <div className="">{category}</div>
               </Link>
             ))
           : [...Array(9)].map((_, index) => (

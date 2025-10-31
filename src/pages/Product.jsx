@@ -17,7 +17,7 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: "100%",
   maxWidth: 600,
-  bgcolor: "background.paper",
+  bgcolor: "var(--background-color)",
   boxShadow: 0,
   borderRadius: 4,
   p: 3,
@@ -173,8 +173,9 @@ function Product() {
         })
           .then((res) => res.json())
           .then((data) => {
-            const reservationRecord = data.store_no + '-' + reservationData.data.rsv_no;
-            console.log('reservation data', reservationRecord);
+            const reservationRecord =
+              data.store_no + "-" + reservationData.data.rsv_no;
+            console.log("reservation data", reservationRecord);
             handleAddReservation(reservationData.data.rsv_no);
             setProductDetails({
               ...productDetails,
@@ -261,7 +262,7 @@ function Product() {
                       </label>
                       <input
                         type="text"
-                        className="form-control"
+                        className="form-control border-0"
                         required
                         id="reserved_by"
                         value={newReservation.reserved_by}
@@ -272,7 +273,10 @@ function Product() {
                           })
                         }
                         // placeholder="Enter your full name"
-                        style={{ backgroundColor: "var(--primary-light)" }}
+                        style={{
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--text-color)",
+                        }}
                       />
                     </div>
                     <div className="mb-3">
@@ -281,7 +285,7 @@ function Product() {
                       </label>
                       <input
                         type="email"
-                        className="form-control"
+                        className="form-control border-0"
                         id="email"
                         required
                         value={newReservation.email}
@@ -292,7 +296,10 @@ function Product() {
                           })
                         }
                         // placeholder="Enter your email address"
-                        style={{ backgroundColor: "var(--primary-light)" }}
+                        style={{
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--text-color)",
+                        }}
                       />
                     </div>
                     <div className="mb-3">
@@ -301,7 +308,7 @@ function Product() {
                       </label>
                       <input
                         type="date"
-                        className="form-control"
+                        className="form-control border-0"
                         id="date"
                         required
                         value={newReservation.date}
@@ -312,7 +319,10 @@ function Product() {
                           })
                         }
                         // placeholder="Select reservation date"
-                        style={{ backgroundColor: "var(--primary-light)" }}
+                        style={{
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--text-color)",
+                        }}
                       />
                     </div>
                     <div className="mb-3">
@@ -321,7 +331,7 @@ function Product() {
                       </label>
                       <input
                         type="number"
-                        className="form-control"
+                        className="form-control border-0"
                         id="quantity"
                         required
                         min={1}
@@ -334,7 +344,10 @@ function Product() {
                           })
                         }
                         // placeholder="Enter quantity"
-                        style={{ backgroundColor: "var(--primary-light)" }}
+                        style={{
+                          backgroundColor: "var(--primary-light)",
+                          color: "var(--text-color)",
+                        }}
                       />
                     </div>
 
@@ -351,7 +364,7 @@ function Product() {
                         Make Reservation
                       </button>
                       <button
-                        className="p-1 px-4 border border-danger outline-0 bg-light text-danger rounded-3 small"
+                        className="p-1 px-4 border-0 outline-0 bg-dark text-light rounded-3 small"
                         onClick={() =>
                           setOpen({ state: false, store_no: null })
                         }
@@ -365,7 +378,7 @@ function Product() {
             </Fade>
           </Modal>
 
-          <div className="container m-auto d-flex gap-4 border rounded-3 p-2 mb-3 flex-column flex-md-row">
+          <div className="container m-auto d-flex gap-4 rounded-3 p-2 mb-3 flex-column flex-md-row" style={{border: "1px solid var(--text-light)"}}>
             <div className="w-100 p-2">
               <img
                 className="img-fluid w-100 p-2"
@@ -445,7 +458,13 @@ function Product() {
                   </div> */}
                 </div>
                 <h1 className="fw-semibold mb-3">{productDetails?.name}</h1>
-                <div className="mb-5 p-2 border bg-light">
+                <div
+                  className="mb-5 p-2"
+                  style={{
+                    backgroundColor: "var(--background-light)",
+                    border: "1px solid var(--text-light)",
+                  }}
+                >
                   <div className="small mb-2">
                     <strong>Description: </strong>
                   </div>
@@ -524,9 +543,13 @@ function Product() {
               </small>
             </div>
           </div>
-          <h4 className="container mt-5 fw-bold">Similar Items</h4>
           {productDetails?.category && (
-            <ProductPicks items={items} Simmilar={productDetails.category} />
+            <>
+              <h4 className="container mt-5 fw-bold">
+                Similar Items from {productDetails.category}
+              </h4>
+              <ProductPicks items={items} Similar={productDetails.category} />
+            </>
           )}
         </ProductContext.Provider>
       ) : (

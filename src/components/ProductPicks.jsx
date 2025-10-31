@@ -11,7 +11,7 @@ function ProductPicks({
   Top = false,
   New = false,
   Fresh = false,
-  Simmilar = null,
+  Similar = null,
 }) {
   const containerRef = useRef();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -42,15 +42,15 @@ function ProductPicks({
         )
         .slice(0, 10);
 
-      const simmilarItems = [...items]
-        .filter((item) => item.category === Simmilar)
+      const SimilarItems = [...items]
+        .filter((item) => item.category === Similar)
         .slice(0, 10);
 
       if (Trending) setPickedItems(trendingItems);
       if (New) setPickedItems(newItems);
       if (Fresh) setPickedItems(freshItems);
       if (Top) setPickedItems([...items].slice(0, 10));
-      if (Simmilar) setPickedItems(simmilarItems);
+      if (Similar) setPickedItems(SimilarItems);
     }
   }, [items]);
 
@@ -224,16 +224,35 @@ function ProductPicks({
                       New 🔥
                     </button>
                   )}
+                  {Trending && (
+                    <button
+                      className="small p-1 px-2 border-0 outline-0 rounded-2"
+                      style={{ backgroundColor: "#FF8C00", color: "white" }}
+                    >
+                      Trending 🔥
+                    </button>
+                  )}
+                  {Fresh && (
+                    <button
+                      className="small p-1 px-2 border-0 outline-0 rounded-2"
+                      style={{ backgroundColor: "#1900ffff", color: "white" }}
+                    >
+                      Fresh ☘️
+                    </button>
+                  )}
+                  
                 </div>
                 <div
-                  className="text-decoration-none item d-flex p-2 pt-3 pb-1 flex-column justify-content-start align-items-start border productItem"
+                  className="text-decoration-none item d-flex p-2 pt-3 pb-1 flex-column justify-content-start align-items-start shadow productItem"
                   style={{
-                    width: "250px",
+                    width: "255px",
                     aspectRatio: "1/1",
                     scrollSnapType: "x mandatory",
                     scrollSnapStop: "always",
                     borderRadius: "8px",
                     scrollSnapAlign: "start",
+                    backgroundColor: "var(--background-light)",
+                    border: "1px solid var(--text-light)",
                   }}
                 >
                   <img
@@ -247,12 +266,20 @@ function ProductPicks({
                     }}
                   />
                   <div className="px-1 m-0 w-100">
-                    <div className="fw-semibold m-0 p-0">{item.name}</div>
+                    <div className="fw-semibold m-0 p-0 fs-6 singleLineClamp">
+                      {item?.name}
+                    </div>
                     <small
-                      className="doubleLineClamp mt-1"
+                      className="singleLineClamp mb-1 mt-1"
+                      style={{ color: "var(--text-light)", fontSize: ".6rem" }}
+                    >
+                      {item?.views} views | {item?.quantity} remaining in stock
+                    </small>
+                    <small
+                      className="singleLineClamp"
                       style={{ color: "var(--text-light)" }}
                     >
-                      {item.description}
+                      {item?.description}
                     </small>
                   </div>
                   <div
@@ -277,7 +304,7 @@ function ProductPicks({
                           lineHeight: "0",
                           color: allWatchList.includes(item?.store_no)
                             ? "var(--primary-color)"
-                            : "",
+                            : "var(--text-color)",
                         }}
                       ></i>
                     </IconButton>
@@ -309,7 +336,7 @@ function ProductPicks({
             ))
           : [...Array(9)].map((_, index) => (
               <div
-              key={index}
+                key={index}
                 style={{ zIndex: 1, lineHeight: 1.5 }}
                 className="text-decoration-none placeholder-glow position-relative"
               >

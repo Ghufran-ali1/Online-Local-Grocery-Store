@@ -39,7 +39,7 @@ function AdminLoginPage() {
       const data = await response.json();
       if (response.ok) {
         setMessage("Login successful: " + data.message);
-        
+
         setAdminDetails(data.user);
         localStorage.setItem("admin_auth_token", data.token);
         setLoggingIn(false);
@@ -61,7 +61,10 @@ function AdminLoginPage() {
     <>
       <AppBreadcrumbs />
       <div className="container m-auto pb-3">
-        <div className="border p-3 rounded-3 mb-3">
+        <div
+          className="p-3 rounded-3 mb-3"
+          style={{ border: "1px solid var(--text-light)" }}
+        >
           <h3 className="fw-semibold">LOGIN</h3>
 
           <div className="d-flex flex-column-reverse flex-lg-row gap-3">
@@ -99,6 +102,7 @@ function AdminLoginPage() {
                       outline: "none",
                       boxShadow: "none",
                       backgroundColor: "var(--primary-light)",
+                      color: "var(--text-color)",
                     }}
                     type="text"
                     id="username"
@@ -114,6 +118,7 @@ function AdminLoginPage() {
                       outline: "none",
                       boxShadow: "none",
                       backgroundColor: "var(--primary-light)",
+                      color: "var(--text-color)",
                     }}
                     type="password"
                     id="password"
