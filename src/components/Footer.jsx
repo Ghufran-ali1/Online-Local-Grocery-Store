@@ -2,9 +2,25 @@ import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import IconButton from "@mui/material/IconButton";
+import { useQuery } from "@tanstack/react-query";
 
 function Footer() {
-  const [items, setItems] = useState(null);
+  const fetchItems = async () => {
+    const res = await fetch(
+      "https://grocery-store-server-theta.vercel.app/api/items"
+    );
+    if (!res.ok) throw new Error("Failed items fetch");
+    return res.json();
+  };
+
+  const {
+    data: items,
+    isLoading: itemsLoading,
+    isError: itemsError,
+  } = useQuery({
+    queryKey: ["items"],
+    queryFn: fetchItems,
+  });
   const [topCategories, setTopCategories] = useState([
     "Fruits",
     "Vegetables",
@@ -12,19 +28,6 @@ function Footer() {
     "Beverages",
     "Meat",
   ]);
-
-
-
-  useEffect(() => {
-      fetch("https://grocery-store-server-theta.vercel.app/api/items")
-        .then((res) => res.json())
-        .then((data) => setItems(data))
-        .catch((err) => {
-          // 
-        })
-        .finally(() => {});
-  }, []);
-
 
   useEffect(() => {
     if (items) {
@@ -60,7 +63,7 @@ function Footer() {
         }}
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       >
-        <LastPageIcon />
+        <LastPageIcon sx={{color: 'white'}} />
       </IconButton>
       <footer
         className="container m-auto d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 pt-3 pb-2"
@@ -135,7 +138,10 @@ function Footer() {
               <input
                 type="text"
                 className="form-control p-2 px-3 border-0 outline-0 shadow-none mt-1 mb-2"
-                style={{ backgroundColor: "var(--primary-light)", color: "var(--text-color)" }}
+                style={{
+                  backgroundColor: "var(--primary-light)",
+                  color: "var(--text-color)",
+                }}
                 placeholder="Enter your name"
               />
             </div>
@@ -144,7 +150,10 @@ function Footer() {
               <input
                 type="email"
                 className="form-control p-2 px-3 border-0 outline-0 shadow-none mt-1 mb-2"
-                style={{ backgroundColor: "var(--primary-light)", color: "var(--text-color)" }}
+                style={{
+                  backgroundColor: "var(--primary-light)",
+                  color: "var(--text-color)",
+                }}
                 placeholder="Enter your email"
               />
             </div>
@@ -152,7 +161,10 @@ function Footer() {
               <label className="fw-semibold small">Enter message:</label>
               <textarea
                 className="form-control p-2 border-0 outline-0 shadow-none mt-1 mb-2"
-                style={{ backgroundColor: "var(--primary-light)", color: "var(--text-color)" }}
+                style={{
+                  backgroundColor: "var(--primary-light)",
+                  color: "var(--text-color)",
+                }}
                 placeholder="Enter your message"
                 rows={5}
               />

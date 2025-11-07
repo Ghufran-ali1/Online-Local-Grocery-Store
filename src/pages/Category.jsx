@@ -17,11 +17,26 @@ import ProductItem from "../components/ProductItem";
 import AppBreadcrumbs from "../components/Breadcrumbs";
 import CallToAction from "../components/CallToAction";
 import NewItemCreateCTA from "../components/NewItemCreateCTA";
+import { useQuery } from "@tanstack/react-query";
 
 function Category() {
   const { category } = useParams();
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const fetchItems = async () => {
+    const res = await fetch(
+      "https://grocery-store-server-theta.vercel.app/api/items"
+    );
+    if (!res.ok) throw new Error("Failed items fetch");
+    return res.json();
+  };
+
+  const {
+    data: items,
+    isLoading: itemsLoading,
+    isError: itemsError,
+  } = useQuery({
+    queryKey: ["items"],
+    queryFn: fetchItems,
+  });
   const [selectedDeals, setSelectedDeals] = useState([]);
   const [view, setView] = useState("grid");
   const [sortBy, setSortBy] = useState("Default Order");
@@ -32,25 +47,6 @@ function Category() {
   const [allResults, setAllResults] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
-
-  useEffect(() => {
-    try {
-      fetch("https://grocery-store-server-theta.vercel.app/api/items")
-        .then((res) => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          return res.json();
-        })
-        .then((data) => {
-          setItems(data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-        });
-    } catch (error) {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     if (items) {

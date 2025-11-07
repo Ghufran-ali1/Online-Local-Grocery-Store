@@ -23,7 +23,37 @@ import { HomeOutlined } from "@mui/icons-material";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import CategoryIcon from "@mui/icons-material/Category";
+import { useQuery } from "@tanstack/react-query";
 
+
+const getStatus = (date) => {
+  const reservedDate = new Date(date);
+  const today = new Date();
+
+  // Strip time for both dates
+  reservedDate.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+
+  if (reservedDate < today) {
+    return (
+      <span className="text-danger alert alert-danger text-center w-100 rounded-3 p-1 px-3 border-0 small">
+        Overdue
+      </span>
+    );
+  } else if (reservedDate > today) {
+    return (
+      <span className="text-success alert alert-success text-center w-100 rounded-3 p-1 px-3 border-0 small">
+        Upcoming
+      </span>
+    );
+  } else {
+    return (
+      <span className="text-primary alert alert-primary text-center w-100 rounded-3 p-1 px-3 border-0 small">
+        Due Today
+      </span>
+    );
+  }
+};
 const style = {
   position: "absolute",
   top: { xs: 0, sm: "100px" },
@@ -59,7 +89,22 @@ function Header() {
   const [openWatchlist, setOpenWatchlist] = useState(false);
   const [openReservations, setOpenReservations] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
-  const [items, setItems] = useState(null);
+  const fetchItems = async () => {
+    const res = await fetch(
+      "https://grocery-store-server-theta.vercel.app/api/items"
+    );
+    if (!res.ok) throw new Error("Failed items fetch");
+    return res.json();
+  };
+
+  const {
+    data: items,
+    isLoading: itemsLoading,
+    isError: itemsError,
+  } = useQuery({
+    queryKey: ["items"],
+    queryFn: fetchItems,
+  });
   const [reservedItems, setReservedItems] = useState(null);
   const [loading, setLoading] = useState(true);
   const [allCategories, setAllCategories] = useState([]);
@@ -112,22 +157,8 @@ function Header() {
 
     window.dispatchEvent(new Event("themeChanged"));
   };
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const res = await fetch(
-          "https://grocery-store-server-theta.vercel.app/api/items"
-        );
-        if (!res.ok) throw new Error("Failed items fetch");
-        setItems(await res.json());
-      } catch (err) {
-        console.error(err);
-        setItems([]);
-      } finally {
-        setLoading(false);
-      }
-    };
 
+  useEffect(() => {
     const fetchReservations = async () => {
       try {
         const res = await fetch(
@@ -411,12 +442,7 @@ function Header() {
                   </span>
                 </div>
                 <div className="d-flex gap-2 align-items-center">
-                  <button
-                    onClick={() => handleAddReservation(item.store_no)}
-                    className="text-light w-100 rounded-3 p-1 px-3 bg-danger border-0 small"
-                  >
-                    Cancel reservation
-                  </button>
+                    {getStatus(item.date)}
                   <IconButton
                     onClick={() => handleAddWatchlist(item.store_no)}
                     className="position-relative rounded-pill"
@@ -573,7 +599,8 @@ function Header() {
     window.dispatchEvent(new Event("watchlist-updated"));
   };
 
-  const handleAddReservation = (rsv_no) => {
+
+  const handleCancelReservation = (rsv_no) => {
     const stored = localStorage.getItem("reservations");
     const current = stored ? JSON.parse(stored) : [];
 
@@ -589,6 +616,7 @@ function Header() {
 
     window.dispatchEvent(new Event("reservations-updated"));
   };
+  
 
   return (
     <div
