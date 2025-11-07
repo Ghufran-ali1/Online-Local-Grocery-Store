@@ -4,10 +4,25 @@ import ProductPicks from "../components/ProductPicks";
 import { Link } from "react-router";
 import { useEffect, useState } from "react";
 import CallToAction from "../components/CallToAction";
+import { useQuery } from "@tanstack/react-query";
 
 function HomePage() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const fetchItems = async () => {
+    const res = await fetch(
+      "https://grocery-store-server-theta.vercel.app/api/items"
+    );
+    if (!res.ok) throw new Error("Failed items fetch");
+    return res.json();
+  };
+
+  const {
+    data: items,
+    isLoading: loading,
+    isError: itemsError,
+  } = useQuery({
+    queryKey: ["items"],
+    queryFn: fetchItems,
+  });
   const stored = localStorage.getItem("watchlist");
   const currentWatchList = stored ? JSON.parse(stored) : [];
   const [allWatchList, setAllWatchlist] = useState(currentWatchList);
@@ -20,25 +35,6 @@ function HomePage() {
     }, 5000);
 
     return () => clearInterval(messageInterval);
-  }, []);
-
-  useEffect(() => {
-    try {
-      fetch("https://grocery-store-server-theta.vercel.app/api/items")
-        .then((res) => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          return res.json();
-        })
-        .then((data) => {
-          setItems(data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-        });
-    } catch (error) {
-      setLoading(false);
-    }
   }, []);
 
   const handleAddWatchlist = (store_no) => {

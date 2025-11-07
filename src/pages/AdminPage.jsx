@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import CategoriesTab from "../components/CategoriesTab";
-import { CircularProgress, TablePagination } from "@mui/material";
+import { CircularProgress, TablePagination, TextField } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { AdminContext } from "../context/AdminContext";
@@ -16,6 +16,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const options = [
   "Date (Newest first)",
@@ -88,7 +89,16 @@ const getStatus = (date) => {
   }
 };
 
+const fetchItems = async () => {
+  const res = await fetch(
+    "https://grocery-store-server-theta.vercel.app/api/items"
+  );
+  if (!res.ok) throw new Error("Failed items fetch");
+  return res.json();
+};
+
 function AdminPage() {
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
   const { adminDetails, isLoading } = useContext(AdminContext);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -96,6 +106,8 @@ function AdminPage() {
   const [reservations, setReservations] = useState([]);
   const [sortedItems, setSortedItems] = useState([]);
   const [allAdmins, setAllAdmins] = useState([]);
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
   const [newItemArray, setNewItemArray] = useState([
     {
       name: "",
@@ -106,7 +118,15 @@ function AdminPage() {
       store_no: shortStkId(),
     },
   ]);
-  const [items, setItems] = useState([]);
+
+  const {
+    data: items,
+    isLoading: itemsLoading,
+    isError: itemsError,
+  } = useQuery({
+    queryKey: ["items"],
+    queryFn: fetchItems,
+  });
   const [open, setOpen] = useState({ state: false, store_no: null });
   const [openEdit, setOpenEdit] = useState({ state: false, store_no: null });
   const [editItemDetails, setEditItemDetails] = useState(null);
@@ -176,17 +196,6 @@ function AdminPage() {
   }, [adminDetails, navigate]);
 
   useEffect(() => {
-    fetch("https://grocery-store-server-theta.vercel.app/api/items")
-      .then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      })
-      .then((data) => {
-        setItems(data);
-      })
-      .catch((error) => {
-        //
-      });
     fetch("https://grocery-store-server-theta.vercel.app/api/admins")
       .then((res) => {
         if (!res.ok) throw new Error("Network response was not ok");
@@ -271,6 +280,29 @@ function AdminPage() {
     setSortedItems(items?.slice().sort((a, b) => a.id - b.id) || []);
   }, [items]);
 
+  // Search functionality
+  useEffect(() => {
+    setSearching(true);
+
+    if (search.trim() !== "" && items) {
+      // Filter items based on search query
+      const searchResults = items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()) ||
+          item.category.toLowerCase().includes(search.toLowerCase()) ||
+          item.description.toLowerCase().includes(search.toLowerCase()) ||
+          item.store_no.toLowerCase().includes(search.toLowerCase())
+      );
+      setTimeout(() => {
+        setSearching(false);
+        setSortedItems(searchResults);
+      }, 1000);
+    } else {
+      setSearching(false);
+      setSortedItems(items || []);
+    }
+  }, [search]);
+
   const pagedItems = React.useMemo(() => {
     const start = page * rowsPerPage;
     const end = start + rowsPerPage;
@@ -321,7 +353,10 @@ function AdminPage() {
       const uploadedItems = response.data; // array of inserted items
 
       // Update local items state
-      setItems((prev) => [...prev, ...uploadedItems]);
+      queryClient.setQueryData(["items"], (prev = []) => [
+        ...prev,
+        ...uploadedItems,
+      ]);
 
       setNewItemArray([
         {
@@ -352,7 +387,9 @@ function AdminPage() {
         { data: { id: store_no } }
       );
       if (response.status === 200) {
-        setItems((prev) => prev.filter((item) => item.store_no !== store_no));
+        queryClient.setQueryData(["items"], (prev = []) =>
+          prev.filter((item) => item.store_no !== store_no)
+        );
         setTimeout(() => {
           alert("Item deleted successfully!");
         }, 1000);
@@ -380,11 +417,12 @@ function AdminPage() {
         editItemDetails
       );
 
-      setItems((prev) =>
-        prev?.map((item) =>
+      queryClient.setQueryData(["items"], (prev = []) =>
+        prev.map((item) =>
           item.store_no === store_no ? editItemDetails : item
         )
       );
+
       const msg = document.getElementById("editSuccess");
 
       // Any 2xx is success
@@ -868,12 +906,46 @@ function AdminPage() {
             className="p-3 rounded-3 mb-3"
             style={{ border: "1px solid var(--text-light)" }}
           >
-            <div className="d-flex mb-3 justify-content-between gap-2 align-items-center">
+            <div className="d-flex mb-3 justify-content-between gap-4 align-items-center">
               <h3 className="fw-bold">Store Items</h3>
+              <div
+                className="flex-fill rounded-pill"
+                style={{
+                  backgroundColor: "var(--background-light)",
+                }}
+              >
+                <TextField
+                  autoFocus={true}
+                  focused
+                  id="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  type="text"
+                  placeholder="Search for products ..."
+                  className="p-4 py-1 border-0 outline-0 rounded-3 m-0"
+                  fullWidth
+                  variant="standard"
+                  color="primary"
+                  InputProps={{
+                    disableUnderline: true,
+                    sx: {
+                      color: "var(--text-color)", // input text
+                      "&::placeholder": {
+                        color: "var(--text-light)",
+                        opacity: 1, // full opacity
+                      },
+                      "& .MuiInputBase-input::placeholder": {
+                        color: "var(--text-light)",
+                        opacity: 1,
+                      },
+                    },
+                  }}
+                />
+              </div>
               <div className="d-flex align-items-center gap-3">
                 <span className="d-flex gap-2 align-items-center">
-                  <i className="bi bi-cart-plus fs-5"></i> {items?.length || 0}{" "}
-                  items found
+                  <i className="bi bi-cart-plus fs-5"></i>{" "}
+                  {sortedItems?.length || 0} items found
                 </span>
                 <span
                   role="button"
@@ -923,133 +995,139 @@ function AdminPage() {
             <div>
               {items?.length > 0 ? (
                 <div>
-                  {pagedItems?.map((item) => (
-                    <div
-                      key={item.id}
-                      className="position-relative rounded-3 mb-3 shadow p-2 d-flex align-items-center flex-column flex-md-row gap-3"
-                      style={{ border: "1px solid var(--text-light)" }}
-                    >
+                  {pagedItems.length > 0 ? (
+                    pagedItems?.map((item) => (
                       <div
-                        className="position-absolute border-0 p-2 px-3 bg-transparent d-flex gap-2"
-                        style={{
-                          top: "10px",
-                          right: "10px",
-                        }}
+                        key={item.id}
+                        className="position-relative rounded-3 mb-3 shadow p-2 d-flex align-items-center flex-column flex-md-row gap-3"
+                        style={{ border: "1px solid var(--text-light)" }}
                       >
-                        <button
-                          className=" border-0 p-2 px-3 bg-transparent d-flex gap-2"
-                          onClick={() => {
-                            setOpenEdit({
-                              state: true,
-                              store_no: item.store_no,
-                            });
-                            setEditItemDetails(item);
-                            setEditItemOriginalDetails(item);
-                          }}
-                          title="Edit"
+                        <div
+                          className="position-absolute border-0 p-2 px-3 bg-transparent d-flex gap-2"
                           style={{
-                            color: "var(--primary-color)",
+                            top: "10px",
+                            right: "10px",
                           }}
                         >
-                          Edit <i className="bi bi-pencil-square"></i>
-                        </button>
-                        <button
-                          className=" border-0 p-2 px-3 bg-transparent d-flex gap-2"
-                          onClick={() =>
-                            setOpen({ state: true, store_no: item.store_no })
-                          }
-                          title="Edit"
-                          style={{
-                            color: "red",
-                          }}
+                          <button
+                            className=" border-0 p-2 px-3 bg-transparent d-flex gap-2"
+                            onClick={() => {
+                              setOpenEdit({
+                                state: true,
+                                store_no: item.store_no,
+                              });
+                              setEditItemDetails(item);
+                              setEditItemOriginalDetails(item);
+                            }}
+                            title="Edit"
+                            style={{
+                              color: "var(--primary-color)",
+                            }}
+                          >
+                            Edit <i className="bi bi-pencil-square"></i>
+                          </button>
+                          <button
+                            className=" border-0 p-2 px-3 bg-transparent d-flex gap-2"
+                            onClick={() =>
+                              setOpen({ state: true, store_no: item.store_no })
+                            }
+                            title="Edit"
+                            style={{
+                              color: "red",
+                            }}
+                          >
+                            Delete <i className="bi bi-trash"></i>
+                          </button>
+                        </div>
+                        <Link
+                          className="hoverBorder"
+                          to={`/store/${item?.category}/${item?.store_no}`}
+                          target="_blank"
                         >
-                          Delete <i className="bi bi-trash"></i>
-                        </button>
+                          <img
+                            className="object-fit-cover object-position-center p-2"
+                            width={250}
+                            height={250}
+                            src={item.gallery[0]}
+                          />
+                        </Link>
+                        <div className="w-100 p-1">
+                          <table
+                            className={`table  adminStoreItemDetails table-sm ${
+                              theme === "dark" ? "table-dark" : ""
+                            }`}
+                          >
+                            <tbody>
+                              <tr>
+                                <th
+                                  className="px-3"
+                                  scope="row"
+                                  style={{ textAlign: "right", width: "20%" }}
+                                >
+                                  ID
+                                </th>
+                                <td>{item.id}</td>
+                              </tr>
+                              <tr>
+                                <th
+                                  className="px-3"
+                                  scope="row"
+                                  style={{ textAlign: "right" }}
+                                >
+                                  Name
+                                </th>
+                                <td>{item.name}</td>
+                              </tr>
+                              <tr>
+                                <th
+                                  className="px-3"
+                                  scope="row"
+                                  style={{ textAlign: "right" }}
+                                >
+                                  Category
+                                </th>
+                                <td>{item.category}</td>
+                              </tr>
+                              <tr>
+                                <th
+                                  className="px-3"
+                                  scope="row"
+                                  style={{ textAlign: "right" }}
+                                >
+                                  Description
+                                </th>
+                                <td>{item.description}</td>
+                              </tr>
+                              <tr>
+                                <th
+                                  className="px-3"
+                                  scope="row"
+                                  style={{ textAlign: "right" }}
+                                >
+                                  Quantity
+                                </th>
+                                <td>{item.quantity}</td>
+                              </tr>
+                              <tr>
+                                <th
+                                  className="px-3"
+                                  scope="row"
+                                  style={{ textAlign: "right" }}
+                                >
+                                  Store No.
+                                </th>
+                                <td>{item.store_no}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                      <Link
-                        className="hoverBorder"
-                        to={`/store/${item?.category}/${item?.store_no}`}
-                        target="_blank"
-                      >
-                        <img
-                          className="object-fit-cover object-position-center p-2"
-                          width={250}
-                          height={250}
-                          src={item.gallery[0]}
-                        />
-                      </Link>
-                      <div className="w-100 p-1">
-                        <table
-                          className={`table  adminStoreItemDetails table-sm ${
-                            theme === "dark" ? "table-dark" : ""
-                          }`}
-                        >
-                          <tbody>
-                            <tr>
-                              <th
-                                className="px-3"
-                                scope="row"
-                                style={{ textAlign: "right", width: "20%" }}
-                              >
-                                ID
-                              </th>
-                              <td>{item.id}</td>
-                            </tr>
-                            <tr>
-                              <th
-                                className="px-3"
-                                scope="row"
-                                style={{ textAlign: "right" }}
-                              >
-                                Name
-                              </th>
-                              <td>{item.name}</td>
-                            </tr>
-                            <tr>
-                              <th
-                                className="px-3"
-                                scope="row"
-                                style={{ textAlign: "right" }}
-                              >
-                                Category
-                              </th>
-                              <td>{item.category}</td>
-                            </tr>
-                            <tr>
-                              <th
-                                className="px-3"
-                                scope="row"
-                                style={{ textAlign: "right" }}
-                              >
-                                Description
-                              </th>
-                              <td>{item.description}</td>
-                            </tr>
-                            <tr>
-                              <th
-                                className="px-3"
-                                scope="row"
-                                style={{ textAlign: "right" }}
-                              >
-                                Quantity
-                              </th>
-                              <td>{item.quantity}</td>
-                            </tr>
-                            <tr>
-                              <th
-                                className="px-3"
-                                scope="row"
-                                style={{ textAlign: "right" }}
-                              >
-                                Store No.
-                              </th>
-                              <td>{item.store_no}</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4 text-muted mt-5 mb-5">
+                      No items found for the selected criteria.
                     </div>
-                  ))}
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-4 text-muted">
@@ -1057,7 +1135,7 @@ function AdminPage() {
                 </div>
               )}
               <TablePagination
-                count={items?.length || 0}
+                count={sortedItems?.length || 0}
                 component="div"
                 page={page}
                 onPageChange={handleChangePage}
