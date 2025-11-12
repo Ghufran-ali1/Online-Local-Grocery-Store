@@ -1,16 +1,38 @@
 import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import { ChevronLeft, ChevronRight, Password } from "@mui/icons-material";
 import { Avatar, Modal } from "@mui/material";
+import Backdrop from "@mui/material/Backdrop";
+import Box from "@mui/material/Box";
+import Fade from "@mui/material/Fade";
+import axios from "axios";
 
-function AdminView({ admins }) {
+const editStyle = {
+  position: "absolute",
+  top: "100px",
+  left: "50%",
+  transform: "translate(-50%)",
+  bgcolor: "var(--background-color)",
+  boxShadow: 0,
+  borderRadius: 4,
+  p: 3,
+};
+
+function AdminView({ admins, setAllAdmins }) {
   const containerRef = useRef();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(true);
   const [activeAdmin, setActiveAdmin] = useState(null);
-
+  const [openEdit, setOpenEdit] = useState({ state: false, id: null });
+  const [editItemDetails, setEditItemDetails] = useState(null);
+  const [editItemOriginalDetails, setEditItemOriginalDetails] = useState(null);
   const [theme, setTheme] = useState(null);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
+  const [oldPasswordError, setOldPasswordError] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("theme") || "light";
@@ -107,6 +129,74 @@ function AdminView({ admins }) {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
+
+
+  const handleEditItem = async () => {
+    const btn = document.getElementById("saveEditAdminBtn");
+    const msg = document.getElementById("editAdminSuccess");
+
+    if(newPassword !== confirmNewPassword) {
+      setPasswordError(true);
+      return;
+    } else {
+      setPasswordError(false);
+    }
+    if(oldPassword !== editItemOriginalDetails.password) {
+      setOldPasswordError(true);
+      return;
+    } else {
+      setOldPasswordError(false);
+    }
+
+    if(newPassword == oldPassword) {
+      msg.innerText =
+        "❌ New password cannot be the same as old password!";
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Updating ...";
+
+    try {
+      const { status, data } = await axios.put(
+        "https://grocery-store-server-theta.vercel.app/api/update-admin",
+        editItemDetails
+      );
+
+      // Any 2xx is success
+      if (status >= 200 && status < 300) {
+        msg.innerText = "✅ Item updated successfully!";
+        msg.classList.add("text-success", "mb-2");
+        msg.classList.remove("text-danger");
+
+        // Update admin in parent state
+        setAllAdmins((prevAdmins) =>
+          prevAdmins.map((admin) =>
+            admin.id === editItemDetails.id ? editItemDetails : admin
+          )
+        );
+
+        // Close after 5 seconds
+        setTimeout(() => {
+          setOpenEdit({ state: false, id: null });
+        }, 5000);
+      }
+    } catch (error) {
+      msg.innerText =
+        "❌ Error updating admin. Please try again later of contact developer!" +
+        (error?.response?.data?.message
+          ? `(${error.response.data.message})`
+          : "");
+      msg.classList.add("text-danger", "mb-2");
+      msg.classList.remove("text-success");
+      console.error("Error updating admin:", error);
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "Try Again ...";
+    }
+  };
+
+
   return (
     <>
       <div className="position-relative p-2 py-3 mb-2 mt-2 container">
@@ -148,7 +238,17 @@ function AdminView({ admins }) {
               </div>
               <div className="text-center">{admin.email}</div>
               <div className="text-center small text-muted">
-                <Link to={`#`} onClick={() => setActiveAdmin(admin)}>
+                <Link
+                  to={`#`}
+                  onClick={() => {
+                    setOpenEdit({
+                      state: true,
+                      id: admin.id,
+                    });
+                    setEditItemDetails(admin);
+                    setEditItemOriginalDetails(admin);
+                  }}
+                >
                   View Details
                 </Link>
               </div>
@@ -165,149 +265,303 @@ function AdminView({ admins }) {
         )}
       </div>
 
-      {activeAdmin && (
-        <div
-          className="position-absolute bg-secondary top-0 w-100 h-100 d-flex justify-content-center align-items-center p-3"
-          style={{ zIndex: 2 }}
-        >
-          <div
-            className="position-relative w-100 rounded-3 mb-3 shadow p-2 d-flex align-items-center flex-column flex-md-row gap-3"
-            style={{ border: "1px solid var(--text-light)", backgroundColor: "var(--background-color)", zIndex: 2 }}
-          >
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        open={openEdit.state}
+        onClose={() => setOpenEdit({ state: false, id: null })}
+        closeAfterTransition
+        slots={{ backdrop: Backdrop }}
+        slotProps={{
+          backdrop: {
+            timeout: 500,
+          },
+        }}
+      >
+        <Fade in={openEdit.state}>
+          <Box sx={editStyle} className="container">
+            <div className="mb-3 d-flex justify-content-between align-items-center">
+              <h4>Edit Item</h4>
+              <p className="m-0 p-0">{editItemDetails?.id}</p>
+            </div>
             <div
-              className="position-absolute border-0 p-2 px-3 bg-transparent d-flex gap-2"
-              style={{
-                top: "0px",
-                right: "10px",
-              }}
-            >
+              className="w-100 editAdminSuccess text-success text-center mb-2"
+              id="editAdminSuccess"
+            ></div>
+            {editItemDetails && (
+              <div>
+                {/* item details */}
+                <div
+                  className="position-relative rounded-3 mb-3 p-2 py-4 d-flex align-items-center flex-column flex-md-row gap-3"
+                  style={{ border: "1px solid var(--text-light)" }}
+                >
+                  <Avatar
+                    className="mb-2 m-auto border"
+                    alt={editItemDetails.name}
+                    src={editItemDetails.avatar}
+                    style={{ width: "200px", height: "200px" }}
+                  />
+                  <div className="w-100 p-1">
+                    <table
+                      className={`table  adminStoreItemDetails table-sm ${
+                        theme === "dark" ? "table-dark" : ""
+                      }`}
+                    >
+                      <tbody>
+                        <tr>
+                          <th
+                            className="px-3"
+                            scope="row"
+                            style={{ textAlign: "right", width: "20%" }}
+                          >
+                            ID
+                          </th>
+                          <td>{editItemDetails?.id}</td>
+                        </tr>
+                        <tr>
+                          <th
+                            className="px-3"
+                            scope="row"
+                            style={{ textAlign: "right" }}
+                          >
+                            Name
+                          </th>
+                          <td>
+                            <input
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              type="text"
+                              value={editItemDetails?.username}
+                              onChange={(e) =>
+                                setEditItemDetails({
+                                  ...editItemDetails,
+                                  username: e.target.value,
+                                })
+                              }
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <th
+                            className="px-3"
+                            scope="row"
+                            style={{ textAlign: "right" }}
+                          >
+                            Email
+                          </th>
+                          <td>
+                            <input
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              type="text"
+                              value={editItemDetails?.email}
+                              onChange={(e) =>
+                                setEditItemDetails({
+                                  ...editItemDetails,
+                                  email: e.target.value,
+                                })
+                              }
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <th
+                            className="px-3"
+                            scope="row"
+                            style={{ textAlign: "right" }}
+                          >
+                            Role
+                          </th>
+                          <td>
+                            <select
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              type="text"
+                              value={editItemDetails?.role}
+                              onChange={(e) =>
+                                setEditItemDetails({
+                                  ...editItemDetails,
+                                  role: e.target.value,
+                                })
+                              }
+                            >
+                              <option value={""}>Select Role</option>
+                              <option className="text-black" value="Executive">
+                                Executive
+                              </option>
+                              <option className="text-black" value="Manager">
+                                Manager
+                              </option>
+                              <option className="text-black" value="Staff">
+                                Staff
+                              </option>
+                            </select>
+                          </td>
+                        </tr>
+
+                        <tr>
+                          <th
+                            className="px-3"
+                            scope="row"
+                            style={{ textAlign: "right" }}
+                          >
+                            Old Password
+                          </th>
+                          <td>
+                            <input
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              type="password"
+                              value={oldPassword}
+                              onChange={(e) => setOldPassword(e.target.value)}
+                            />
+
+                            {oldPasswordError && (
+                              <div
+                                className="w-100 editAdminSuccess px-2 text-danger text-left small mb-2"
+                                id="editAdminSuccess"
+                              >
+                                ❌ You have entered an incorrect password!{" "}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                        <tr>
+                          <th
+                            className="px-3"
+                            scope="row"
+                            style={{ textAlign: "right" }}
+                          >
+                            New Password
+                          </th>
+                          <td>
+                            <input
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              type="password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                            />
+                          </td>
+                        </tr>
+                        <tr>
+                          <th
+                            className="px-3"
+                            scope="row"
+                            style={{ textAlign: "right" }}
+                          >
+                            Confirm New Password
+                          </th>
+                          <td>
+                            <input
+                              style={{
+                                boxShadow: "none",
+                                color: "var(--text-color)",
+                              }}
+                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                              type="password"
+                              value={confirmNewPassword}
+                              onChange={(e) => setConfirmNewPassword(e.target.value)
+                              }
+                            />
+
+                            {passwordError && (
+                              <div
+                                className="w-100 editAdminSuccess px-2 text-danger text-left small mb-2"
+                                id="editAdminSuccess"
+                              >
+                                ❌ Passwords do not match!{" "}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* // avatar  */}
+                <div className="mb-3">
+                  <label className="form-label">Select Avatar</label>
+                  <input
+                    type="file"
+                    className="form-control bg-transparent"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        setEditItemDetails((prev) => ({
+                          ...prev,
+                          avatar: ev.target.result,
+                        }));
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="d-flex justify-content-end">
               <button
-                className=" border-0 p-2 px-3 bg-transparent d-flex gap-2"
-                onClick={() => {
-                  // setOpenEdit({
-                  //   state: true,
-                  //   store_no: item.store_no,
-                  // });
-                  // setEditItemDetails(item);
-                  // setEditItemOriginalDetails(item);
-                }}
-                title="Edit"
-                style={{
-                  color: "var(--primary-color)",
-                }}
-              >
-                Edit <i className="bi bi-pencil-square"></i>
-              </button>
-              <button
-                className=" border-0 p-2 px-3 bg-transparent d-flex gap-2"
-                onClick={() =>
-                  // setOpen({ state: true, store_no: item.store_no })
-                  true
+                id="saveEditAdminBtn"
+                className="p-1 px-4 me-3 outline-0 rounded-3 small"
+                onClick={() => handleEditItem(openEdit?.id)}
+                disabled={
+                  JSON.stringify(editItemDetails) ===
+                  JSON.stringify(editItemOriginalDetails)
                 }
-                title="Edit"
                 style={{
-                  color: "red",
+                  backgroundColor:
+                    JSON.stringify(editItemDetails) ===
+                    JSON.stringify(editItemOriginalDetails)
+                      ? "transparent"
+                      : "var(--primary-color)",
+                  border:
+                    JSON.stringify(editItemDetails) ===
+                    JSON.stringify(editItemOriginalDetails)
+                      ? "1 px solid red"
+                      : "1px solid var(--primary-color)",
+                  cursor:
+                    JSON.stringify(editItemDetails) ===
+                    JSON.stringify(editItemOriginalDetails)
+                      ? "not-allowed"
+                      : "pointer",
+                  color:
+                    JSON.stringify(editItemDetails) ===
+                    JSON.stringify(editItemOriginalDetails)
+                      ? "red"
+                      : "white",
                 }}
               >
-                Delete <i className="bi bi-trash"></i>
+                Save Changes
               </button>
               <button
-                className=" border-0 p-2 bg-transparent d-flex gap-2"
-                onClick={() =>
-                  setActiveAdmin(null)
-                }
-                title="Close"
-                style={{
-                  color: "red",
-                }}
+                className="p-1 px-4 border-0 outline-0 bg-dark text-light rounded-3 small"
+                onClick={() => setOpenEdit({ state: false, id: null })}
               >
-                Close <i className="bi bi-x-lg"></i>
+                Cancel
               </button>
             </div>
-            <div className="p-2">
-              <Avatar
-                className="object-fit-cover object-position-center p-2"
-                sx={{ width: 200, height: 200 }}
-                src={activeAdmin?.avatar}
-                alt={activeAdmin?.username}
-              />
-            </div>
-            <div className="w-100 p-1 mt-2">
-              <table
-                className={`table  adminStoreItemDetails table-sm ${
-                  theme === "dark" ? "table-dark" : ""
-                }`}
-              >
-                <tbody>
-                  <tr>
-                    <th
-                      className="px-3"
-                      scope="row"
-                      style={{ textAlign: "right", width: "20%" }}
-                    >
-                      ID
-                    </th>
-                    <td>{activeAdmin.id}</td>
-                  </tr>
-                  <tr>
-                    <th
-                      className="px-3"
-                      scope="row"
-                      style={{ textAlign: "right" }}
-                    >
-                      Name
-                    </th>
-                    <td>{activeAdmin.username}</td>
-                  </tr>
-                  <tr>
-                    <th
-                      className="px-3"
-                      scope="row"
-                      style={{ textAlign: "right" }}
-                    >
-                      Email
-                    </th>
-                    <td>{activeAdmin.email}</td>
-                  </tr>
-                  <tr>
-                    <th
-                      className="px-3"
-                      scope="row"
-                      style={{ textAlign: "right" }}
-                    >
-                      Role
-                    </th>
-                    <td>{activeAdmin.role}</td>
-                  </tr>
-                  <tr>
-                    <th
-                      className="px-3"
-                      scope="row"
-                      style={{ textAlign: "right" }}
-                    >
-                      Created By
-                    </th>
-                    <td>
-                      {admins.find((a) => a.id === activeAdmin.created_by)
-                        ?.username || "Not defined!"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th
-                      className="px-3"
-                      scope="row"
-                      style={{ textAlign: "right" }}
-                    >
-                      Date Created
-                    </th>
-                    <td>{activeAdmin.created_at}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
+          </Box>
+        </Fade>
+      </Modal>
     </>
   );
 }

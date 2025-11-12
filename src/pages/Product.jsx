@@ -9,6 +9,7 @@ import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
+import { useQuery } from "@tanstack/react-query";
 
 const style = {
   position: "absolute",
@@ -29,8 +30,26 @@ function Product() {
   const [productDetails, setProductDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [items, setItems] = useState([]);
-  const stored = localStorage.getItem("watchlist");
+
+
+
+    const fetchItems = async () => {
+      const res = await fetch(
+        "https://grocery-store-server-theta.vercel.app/api/items"
+      );
+      if (!res.ok) throw new Error("Failed items fetch");
+      return res.json();
+    };
+  
+    const {
+      data: items,
+      isLoading: itemsLoading,
+      isError: itemsError,
+    } = useQuery({
+      queryKey: ["items"],
+      queryFn: fetchItems,
+    });
+      const stored = localStorage.getItem("watchlist");
   const currentWatchList = stored ? JSON.parse(stored) : [];
   const [watchlistIdentifiers, setWatchlistIdentifiers] =
     useState(currentWatchList);
@@ -42,19 +61,6 @@ function Product() {
     quantity: 5,
   });
 
-  useEffect(() => {
-    fetch(`https://grocery-store-server-theta.vercel.app/api/items`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-        return res.json();
-      })
-      .then((data) => {
-        setItems(data);
-      })
-      .catch((err) => {
-        //
-      });
-  }, []);
 
   // Fetch product details
   useEffect(() => {
@@ -175,7 +181,7 @@ function Product() {
           .then((data) => {
             const reservationRecord =
               data.store_no + "-" + reservationData.data.rsv_no;
-            console.log("reservation data", reservationRecord);
+            // console.log("reservation data", reservationRecord);
             handleAddReservation(reservationData.data.rsv_no);
             setProductDetails({
               ...productDetails,
@@ -184,7 +190,7 @@ function Product() {
             });
           })
           .catch((err) => {
-            console.log(err);
+            // console.log(err);
           });
 
         setTimeout(() => {
@@ -194,7 +200,7 @@ function Product() {
         }, 2000);
       })
       .catch((err) => {
-        console.log(err);
+        // console.log(err);
         document.getElementById("reserveBtn").disabled = false;
         document.getElementById("reserveBtn").innerText = "Make Reservation";
       });
@@ -484,6 +490,10 @@ function Product() {
                       <i className="bi bi-info-circle"></i>{" "}
                       {productDetails?.quantity} Remaining
                     </span>
+                  ) : productDetails?.quantity == 0 ? (
+                    <span className="d-flex gap-2 align-items-center">
+                      <i className="bi bi-info-circle"></i> Item is out of stock. Please contact the store to make a special request!
+                    </span>
                   ) : (
                     <span className="d-flex gap-2 align-items-center">
                       <i className="bi bi-info-circle"></i> Only{" "}
@@ -491,7 +501,7 @@ function Product() {
                     </span>
                   )}
                 </small>
-                <div className="d-flex gap-2 mt-1">
+                <div className="d-flex gap-2 mt-2">
                   <button
                     className="small p-1 px-4 border-0 outline-0 rounded-3"
                     style={{ backgroundColor: "black", color: "white" }}
@@ -499,12 +509,19 @@ function Product() {
                     <i className="bi bi-eye"></i> &nbsp; {productDetails?.views}{" "}
                     views
                   </button>
-                  {productDetails?.stock && (
+                  {productDetails?.stock ? (
                     <button
                       className="small p-1 px-4 mr-2 border-0 outline-0 rounded-3"
                       style={{ backgroundColor: "green", color: "white" }}
                     >
                       <i className="bi bi-cart"></i> &nbsp; In stock
+                    </button>
+                  ) : (
+                    <button
+                      className="small p-1 px-4 mr-2 border-0 outline-0 rounded-3"
+                      style={{ backgroundColor: "red", color: "white" }}
+                    >
+                      <i className="bi bi-cart-x"></i> &nbsp; Out of stock
                     </button>
                   )}
                 </div>
@@ -514,6 +531,7 @@ function Product() {
                   style={{ width: "70px" }}
                   max={productDetails?.quantity}
                   value={newReservation.quantity}
+                  disabled={productDetails?.quantity == 0}
                   onChange={(e) =>
                     setNewReservation({
                       ...newReservation,
@@ -525,6 +543,8 @@ function Product() {
                 />
                 <button
                   className="w-100 text-light p-2 rounded-2"
+                  disabled={productDetails?.quantity == 0}
+                  id="reserveBtn"
                   style={{
                     border: "1px solid var(--primary-color)",
                     backgroundColor: "var(--primary-color)",
@@ -545,10 +565,11 @@ function Product() {
           </div>
           {productDetails?.category && (
             <>
-              <h4 className="container mt-5 fw-bold">
+              <h4 className="container mt-5 mb-3 fw-bold">
                 Similar Items from {productDetails.category}
               </h4>
-              <ProductPicks items={items} Similar={productDetails.category} />
+              <hr className="container mb-4" />
+                <ProductPicks loading={itemsLoading} items={items} Similar={productDetails.category} />
             </>
           )}
         </ProductContext.Provider>

@@ -195,7 +195,7 @@ function ProductPicks({
           scrollBehavior: "smooth",
         }}
       >
-        {!loading
+        {items && !loading
           ? PickedItems.map((item, index) => (
               <Link
                 onClick={() => window.scrollTo(0, 0)}
@@ -208,12 +208,19 @@ function ProductPicks({
                   className="d-flex gap-2 position-absolute"
                   style={{ top: "8px", right: "8px", zIndex: 10 }}
                 >
-                  {item.stock && (
+                  {item?.stock ? (
                     <button
                       className="small p-1 px-2 border-0 outline-0 rounded-2"
                       style={{ backgroundColor: "green", color: "white" }}
                     >
                       In stock
+                    </button>
+                  ) : (
+                    <button
+                      className="small p-1 px-2 border-0 outline-0 rounded-2"
+                      style={{ backgroundColor: "red", color: "white" }}
+                    >
+                      Out of stock
                     </button>
                   )}
                   {New && (
@@ -240,7 +247,6 @@ function ProductPicks({
                       Fresh ☘️
                     </button>
                   )}
-                  
                 </div>
                 <div
                   className="text-decoration-none item d-flex p-2 pt-3 pb-1 flex-column justify-content-start align-items-start shadow productItem"
@@ -258,9 +264,9 @@ function ProductPicks({
                   <img
                     src={`${item.gallery[0]}`}
                     width={"100%"}
-                    className="mb-2 object-fit-cover object-position-center p-2"
+                    className="mb-2 object-fit-cover object-position-center p-0 mb-2"
                     style={{
-                      aspectRatio: "1/.9",
+                      aspectRatio: "1/.8",
                       objectFit: "cover",
                       objectPosition: "center",
                     }}
@@ -270,10 +276,17 @@ function ProductPicks({
                       {item?.name}
                     </div>
                     <small
-                      className="singleLineClamp mb-1 mt-1"
+                      className="singleLineClamp mb-1 mt-2"
                       style={{ color: "var(--text-light)", fontSize: ".6rem" }}
                     >
-                      {item?.views} views | {item?.quantity} remaining in stock
+                      {item?.views} views |{" "}
+                      <span
+                        style={{
+                          color: item?.quantity < 10 ? "red" : "inherit",
+                        }}
+                      >
+                        {item?.quantity} remaining in stock
+                      </span>
                     </small>
                     <small
                       className="singleLineClamp"

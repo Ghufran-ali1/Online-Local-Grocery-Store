@@ -47,12 +47,19 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
         className="d-flex gap-2 position-absolute"
         style={{ top: "8px", right: "8px", zIndex: 10 }}
       >
-        {ProductDetails?.stock && (
+        {ProductDetails?.stock ? (
           <button
             className="small p-1 px-2 border-0 outline-0 rounded-2"
             style={{ backgroundColor: "green", color: "white" }}
           >
             In stock
+          </button>
+        ) : (          
+          <button
+            className="small p-1 px-2 border-0 outline-0 rounded-2"
+            style={{ backgroundColor: "red", color: "white" }}
+          >
+            Out of stock
           </button>
         )}
         {/* {New && <button className='small p-1 px-2 border-0 outline-0 rounded-2' style={{ backgroundColor: '#FF8C00', color: 'white' }}>New 🔥</button>} */}
@@ -75,9 +82,9 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
           src={`${ProductDetails?.gallery[0]}`}
           alt={""}
           width={display === "grid" ? "100%" : "200px"}
-          className="mb-2 object-fit-cover object-position-center p-2"
+          className="mb-2 rounded-3 object-fit-cover object-position-center p-0"
           style={{
-            aspectRatio: "1/.9",
+            aspectRatio: "1/.8",
             objectFit: "cover",
             objectPosition: "center",
           }}
@@ -87,8 +94,8 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
             <div className="fw-semibold m-0 p-0 fs-6 singleLineClamp">
               {ProductDetails?.name}
             </div>
-            <small className="singleLineClamp mb-1 mt-1" style={{ color: "var(--text-light)", fontSize: '.6rem' }}>
-              {ProductDetails?.views} views | {ProductDetails?.quantity} remaining in stock
+            <small className="singleLineClamp mb-1 mt-2" style={{ color: "var(text-light)", fontSize: '.65rem' }}>
+              {ProductDetails?.views} views | <span style={{ color: ProductDetails?.quantity < 10 ? 'red' : 'inherit' }}>{ProductDetails?.quantity} remaining in stock</span>
             </small>
             <small className="singleLineClamp" style={{ color: "var(--text-light)" }}>
               {ProductDetails?.description}
