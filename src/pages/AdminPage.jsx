@@ -17,6 +17,58 @@ import ListItemText from "@mui/material/ListItemText";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { pieArcLabelClasses, PieChart } from "@mui/x-charts/PieChart";
+
+
+// Generate shades from primary color to white
+const generateGrayShades  = (count) => {
+  if (count === 1) return ['var(--primary-color)'];
+
+  // Get primary color hex variable
+  const primaryColor = getComputedStyle(document.documentElement)
+    .getPropertyValue('--primary-color')
+    .trim();
+
+  // Convert hex to HSL helper
+  const hexToHSL = (H) => {
+    let r = 0, g = 0, b = 0;
+    if (H.length === 4) {
+      r = "0x" + H[1] + H[1];
+      g = "0x" + H[2] + H[2];
+      b = "0x" + H[3] + H[3];
+    } else if (H.length === 7) {
+      r = "0x" + H[1] + H[2];
+      g = "0x" + H[3] + H[4];
+      b = "0x" + H[5] + H[6];
+    }
+    r /= 255; g /= 255; b /= 255;
+    const cmin = Math.min(r, g, b),
+          cmax = Math.max(r, g, b),
+          delta = cmax - cmin;
+    let h = 0, s = 0, l = 0;
+    if (delta === 0) h = 0;
+    else if (cmax === r) h = ((g - b) / delta) % 6;
+    else if (cmax === g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+    l = (cmax + cmin) / 2;
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+    return [h, s, l];
+  };
+
+  const [h, s, baseL] = hexToHSL(primaryColor);
+
+  // Generate evenly spaced shades adding white
+  return Array.from({ length: count }, (_, i) => {
+    const lightness = Math.round(baseL + (100 - baseL) * (i / (count - 1)));
+    return `hsl(${h}, ${s}%, ${lightness}%)`;
+  });
+};
+
+
 
 const options = [
   "Date (Newest first)",
@@ -464,6 +516,40 @@ function AdminPage() {
   }, []);
 
   if (!theme) return null;
+
+
+
+  const categoryCounts = items?.reduce((acc, item) => {
+  acc[item.category] = (acc[item.category] || 0) + 1;
+  return acc;
+}, {});
+
+// 2️⃣ Convert into chart-friendly array
+const dataVal = items ? Object?.entries(categoryCounts).map(([label, value]) => ({
+  label,
+  value,
+})) : [];
+
+const total = dataVal.reduce((sum, d) => sum + d.value, 0);
+const valueFormatter = (item) => {
+  const pct = ((item.value / total) * 100).toFixed(1);
+  return `${item.label}: ${item.value} (${pct}%)`;
+};
+
+  const size = {
+    width: 400,
+    height: 300,
+  };
+
+  const data = {
+    data: dataVal,
+    valueFormatter,
+  };
+
+
+  const grayShades = generateGrayShades(dataVal.length);
+
+
   return (
     <>
       <AppBreadcrumbs />
@@ -533,7 +619,7 @@ function AdminPage() {
             {editItemDetails && (
               <div>
                 {/* item details */}
-                <div className="border position-relative rounded-3 mb-3 p-2 d-flex align-items-center flex-column flex-md-row gap-3">
+                <div className="position-relative rounded-3 mb-3 p-2 d-flex align-items-center flex-column flex-md-row gap-3" style={{border: '1px solid var(--text-light)'}}>
                   <img
                     className="object-fit-cover object-position-center p-2"
                     width={250}
@@ -799,6 +885,31 @@ function AdminPage() {
         </div>
       ) : adminDetails ? (
         <div className="container m-auto min-vh-100">
+          <div
+            className="p-3 rounded-3 mb-3"
+            // style={{ border: "1px solid var(--text-light)" }}
+          >
+            <PieChart
+              series={[
+                {
+                  arcLabel: (item) => `${item.label}: ${item.value}`,
+                  arcLabelMinAngle: 35,
+                  arcLabelRadius: "60%",
+                  paddingAngle: 0,
+                  ...data,
+                },
+              ]}
+              colors={grayShades}
+              sx={{
+                [`& .${pieArcLabelClasses.root}`]: {
+                  fontWeight: "bold",
+                  fill: "white",
+                      stroke: 'none', // ensure no outline
+                },
+              }}
+              {...size}
+            />
+          </div>
           {(adminDetails?.role === "Manager" ||
             adminDetails?.role === "Executive") && (
             <div
@@ -813,7 +924,7 @@ function AdminPage() {
                 </span>
               </div>
 
-              <AdminView admins={allAdmins} />
+              <AdminView admins={allAdmins} setAllAdmins={setAllAdmins} />
               <div className="d-flex justify-content-center mt-2">
                 <Link to="/admin/signup">
                   <button
@@ -915,14 +1026,14 @@ function AdminPage() {
                 }}
               >
                 <TextField
-                  autoFocus={true}
+                  autoFocus={false}
                   focused
                   id="search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   type="text"
                   placeholder="Search for products ..."
-                  className="p-4 py-1 border-0 outline-0 rounded-3 m-0"
+                  className="p-4 py-1 border-0 outline-0 rounded-3 m-0 d-sm-none d-md-block"
                   fullWidth
                   variant="standard"
                   color="primary"

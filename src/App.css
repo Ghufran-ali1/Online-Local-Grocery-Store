@@ -213,3 +213,9 @@ textarea::-moz-placeholder {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+/* Force legend text color to follow your theme */
+.MuiChartsLegend-root,
+.MuiChartsLegend-label {
+  color: var(--text-color) !important;
+  fill: var(--text-color) !important;
+}

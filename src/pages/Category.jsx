@@ -7,6 +7,7 @@ import {
   FormControlLabel,
   FormGroup,
   TablePagination,
+  TextField,
 } from "@mui/material";
 import GridViewIcon from "@mui/icons-material/GridView";
 import ViewListIcon from "@mui/icons-material/ViewList";
@@ -18,6 +19,15 @@ import AppBreadcrumbs from "../components/Breadcrumbs";
 import CallToAction from "../components/CallToAction";
 import NewItemCreateCTA from "../components/NewItemCreateCTA";
 import { useQuery } from "@tanstack/react-query";
+
+const options = [
+  "Date (Newest first)",
+  "Date (Oldest first)",
+  "Alphabetical (A - Z)",
+  "Alphabetical (Z - A)",
+  "Stock Quantity (Less first)",
+  "Stock Quantity (More first)",
+];
 
 function Category() {
   const { category } = useParams();
@@ -39,7 +49,6 @@ function Category() {
   });
   const [selectedDeals, setSelectedDeals] = useState([]);
   const [view, setView] = useState("grid");
-  const [sortBy, setSortBy] = useState("Default Order");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [columnCount, setColumnCount] = useState(4);
@@ -47,6 +56,11 @@ function Category() {
   const [allResults, setAllResults] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [sortedItems, setSortedItems] = useState([]);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const openMenu = Boolean(anchorEl);
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     if (items) {
@@ -109,14 +123,72 @@ function Category() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleClickListItem = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
 
+  const handleMenuItemClick = (event, index) => {
+    setSelectedIndex(index);
+    setAnchorEl(null);
+  };
+
   // Sort and slice items for current page
-  const sortedItems = React.useMemo(() => {
-    return allResults?.slice().sort((a, b) => a.id - b.id) || [];
+
+  useEffect(() => {
+    if (!allResults) return;
+
+    let sorted = [...sortedItems];
+
+    switch (selectedIndex) {
+      case 0:
+        // Date (Newest first)
+        sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        break;
+
+      case 1:
+        // Date (Oldest first)
+        sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        break;
+
+      case 2:
+        // Alphabetical (A - Z)
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+
+      case 3:
+        // Alphabetical (Z - A)
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+        break;
+
+      case 4:
+        // Stock Quantity (Less first)
+        sorted.sort((a, b) => a.quantity - b.quantity);
+        break;
+
+      case 5:
+        // Stock Quantity (More first)
+        sorted.sort((a, b) => b.quantity - a.quantity);
+        break;
+
+      default:
+        // No sorting or reset
+        sorted = [...allResults];
+        break;
+    }
+
+    setSortedItems(sorted);
+  }, [selectedIndex, allResults]);
+
+  useEffect(() => {
+    const defaultSorted = [...allResults]?.sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+    setSortedItems(defaultSorted);
   }, [allResults]);
 
   const pagedItems = React.useMemo(() => {
@@ -124,6 +196,29 @@ function Category() {
     const end = start + rowsPerPage;
     return sortedItems.slice(start, end);
   }, [sortedItems, page, rowsPerPage]);
+
+  // Search functionality
+  useEffect(() => {
+    setSearching(true);
+
+    if (search.trim() !== "" && allResults) {
+      // Filter category items based on search query
+      const searchResults = allResults.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()) ||
+          item.category.toLowerCase().includes(search.toLowerCase()) ||
+          item.description.toLowerCase().includes(search.toLowerCase()) ||
+          item.store_no.toLowerCase().includes(search.toLowerCase())
+      );
+      setTimeout(() => {
+        setSearching(false);
+        setSortedItems(searchResults);
+      }, 1000);
+    } else {
+      setSearching(false);
+      setSortedItems(allResults || []);
+    }
+  }, [search]);
 
   return (
     <>
@@ -192,94 +287,108 @@ function Category() {
               minHeight: "50vh",
             }}
           >
-            <div className="d-flex justify-content-between mt-1 mb-2 align-items-center">
+            <div className="d-flex mb-3 justify-content-between gap-4 align-items-center">
               <h3 className="fw-bold">{category}</h3>
+
+              <div
+                className="flex-fill rounded-pill"
+                style={{
+                  backgroundColor: "var(--background-color)",
+                }}
+              >
+                <TextField
+                  autoFocus={true}
+                  focused
+                  id="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  type="text"
+                  placeholder="Search for products ..."
+                  className="p-4 py-1 border-0 outline-0 rounded-3 m-0 d-sm-none d-md-block"
+                  fullWidth
+                  variant="standard"
+                  color="primary"
+                  InputProps={{
+                    disableUnderline: true,
+                    sx: {
+                      color: "var(--text-color)", // input text
+                      "&::placeholder": {
+                        color: "var(--text-light)",
+                        opacity: 1, // full opacity
+                      },
+                      "& .MuiInputBase-input::placeholder": {
+                        color: "var(--text-light)",
+                        opacity: 1,
+                      },
+                    },
+                  }}
+                />
+              </div>
               <div className="d-flex gap-2 align-items-center">
                 <GridViewIcon
                   role="button"
                   onClick={() => setView("grid")}
-                  style={{ color: view === "grid" && "var(--primary-color)" }}
-                  className="p-1"
+                  style={{
+                    color: view === "grid" && "var(--primary-color)",
+                    border: view === "grid" && "1px solid var(--text-light)",
+                    borderRadius: view === "grid" && "3px",
+                  }}
                   fontSize="medium"
                 />
                 <ViewListIcon
                   role="button"
                   onClick={() => setView("list")}
-                  style={{ color: view === "list" && "var(--primary-color)" }}
+                  style={{
+                    color: view === "list" && "var(--primary-color)",
+                    border: view === "list" && "1px solid var(--text-light)",
+                    borderRadius: view === "list" && "3px",
+                  }}
                   fontSize="medium"
                 />
 
                 <span
-                  className="p-1 px-3 small"
                   role="button"
-                  onClick={handleClick}
-                  aria-controls={open ? "account-menu" : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? "true" : undefined}
+                  aria-expanded={openMenu ? "true" : undefined}
+                  onClick={handleClickListItem}
+                  className="d-flex fw-bold gap-2 align-items-center"
+                  title={options[selectedIndex]}
                   style={{
-                    color:
-                      sortBy === "Default Order"
-                        ? "var(--text-color)"
-                        : "var(--primary-color)",
+                    color: selectedIndex !== 0 && "var(--primary-color)",
                   }}
                 >
                   Sort by &nbsp;
                   <SwapVertIcon fontSize="small" />
                 </span>
+
                 <Menu
+                  id="lock-menu"
                   anchorEl={anchorEl}
-                  id="account-menu"
-                  open={open}
+                  open={openMenu}
                   onClose={handleClose}
-                  onClick={handleClose}
                   slotProps={{
-                    paper: {
-                      elevation: 0,
-                      sx: {
-                        overflow: "visible",
-                        filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                        mt: 1.5,
-                        "& .MuiAvatar-root": {
-                          width: 32,
-                          height: 32,
-                          ml: -0.5,
-                          mr: 1,
-                        },
-                        "&::before": {
-                          content: '""',
-                          display: "block",
-                          position: "absolute",
-                          top: 0,
-                          right: 14,
-                          width: 10,
-                          height: 10,
-                          bgcolor: "background.paper",
-                          transform: "translateY(-50%) rotate(45deg)",
-                          zIndex: 0,
-                        },
-                      },
+                    list: {
+                      "aria-labelledby": "lock-button",
+                      role: "listbox",
                     },
                   }}
-                  transformOrigin={{ horizontal: "right", vertical: "top" }}
-                  anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 >
-                  {[
-                    "Default Order",
-                    "Date Added",
-                    "Stock Sie",
-                    "Alphabetical Order (A - Z)",
-                    "Alphabetical Order (Z - A)",
-                  ].map((sort) => (
+                  {options.map((option, index) => (
                     <MenuItem
-                      className="small mb-2"
-                      selected={sortBy === sort}
-                      key={sort}
-                      onClick={() => {
-                        setSortBy(sort);
-                        handleClose();
-                      }}
+                      key={option}
+                      selected={index === selectedIndex}
+                      onClick={(event) => handleMenuItemClick(event, index)}
                     >
-                      {sort}
+                      <div
+                        className="w-100 small"
+                        style={{
+                          color:
+                            index === selectedIndex
+                              ? "var(--primary-color)"
+                              : "",
+                        }}
+                      >
+                        {option}
+                      </div>
                     </MenuItem>
                   ))}
                 </Menu>
@@ -290,22 +399,40 @@ function Category() {
               {allResults?.length || 0} items found in {category}
             </div>
 
-            {allResults?.length > 0 ? (
-              <div
-                className="d-grid gap-3 justify-content-start"
-                style={{
-                  gridTemplateColumns:
-                    view === "grid" ? `repeat(${columnCount}, 1fr)` : "1fr",
-                }}
-              >
-                {pagedItems?.map((item) => (
-                  <ProductItem
-                    display={view}
-                    key={item.id}
-                    ProductDetails={item}
+            {!itemsLoading ? (
+              pagedItems.length > 0 ? (
+                <>
+                  <div
+                    className="d-grid gap-3 justify-content-start"
+                    style={{
+                      gridTemplateColumns:
+                        view === "grid" ? `repeat(${columnCount}, 1fr)` : "1fr",
+                    }}
+                  >
+                    {pagedItems?.map((item) => (
+                      <ProductItem
+                        display={view}
+                        key={item.id}
+                        ProductDetails={item}
+                      />
+                    ))}
+                  </div>
+
+                  <TablePagination
+                    count={sortedItems?.length || 0}
+                    component="div"
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    sx={{ color: "var(--text-color)" }}
                   />
-                ))}
-              </div>
+                </>
+              ) : (
+                <div className="text-center py-4 text-muted mt-5 mb-5">
+                  No items found for the selected criteria.
+                </div>
+              )
             ) : (
               <div
                 className="d-grid gap-3 justify-content-start"
@@ -382,17 +509,6 @@ function Category() {
                 ))}
               </div>
             )}
-            {/* <div className='text-center py-4 text-muted'>{allResults?.length || 0} items found in {category}</div> */}
-
-            <TablePagination
-              count={allResults?.length || 0}
-              component="div"
-              page={page}
-              onPageChange={handleChangePage}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              sx={{ color: "var(--text-color)" }}
-            />
           </div>
         </div>
       </div>
