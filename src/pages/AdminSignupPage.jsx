@@ -38,7 +38,7 @@ function AdminSignupPage() {
         }
       );
 
-      setMessage("Signup successful! You can now log in.");
+      setMessage("Admin Created successful! Admin can now use these details to log in.");
       setFormData({
         username: "",
         email: "",
@@ -48,7 +48,7 @@ function AdminSignupPage() {
       });
 
       setTimeout(() => {
-        window.location.href = "/admin/login";
+        window.location.href = "/admin";
       }, 3000);
     } catch (error) {
       let msg = "Signup failed. Please try again.";

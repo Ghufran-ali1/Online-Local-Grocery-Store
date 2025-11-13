@@ -10,7 +10,7 @@ import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Fade from "@mui/material/Fade";
 import AdminView from "../components/AdminView";
-import { Link, Navigate, useNavigate } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
@@ -19,19 +19,20 @@ import Menu from "@mui/material/Menu";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { pieArcLabelClasses, PieChart } from "@mui/x-charts/PieChart";
 
-
 // Generate shades from primary color to white
-const generateGrayShades  = (count) => {
-  if (count === 1) return ['var(--primary-color)'];
+const generateGrayShades = (count) => {
+  if (count === 1) return ["var(--primary-color)"];
 
   // Get primary color hex variable
   const primaryColor = getComputedStyle(document.documentElement)
-    .getPropertyValue('--primary-color')
+    .getPropertyValue("--primary-color")
     .trim();
 
   // Convert hex to HSL helper
   const hexToHSL = (H) => {
-    let r = 0, g = 0, b = 0;
+    let r = 0,
+      g = 0,
+      b = 0;
     if (H.length === 4) {
       r = "0x" + H[1] + H[1];
       g = "0x" + H[2] + H[2];
@@ -41,11 +42,15 @@ const generateGrayShades  = (count) => {
       g = "0x" + H[3] + H[4];
       b = "0x" + H[5] + H[6];
     }
-    r /= 255; g /= 255; b /= 255;
+    r /= 255;
+    g /= 255;
+    b /= 255;
     const cmin = Math.min(r, g, b),
-          cmax = Math.max(r, g, b),
-          delta = cmax - cmin;
-    let h = 0, s = 0, l = 0;
+      cmax = Math.max(r, g, b),
+      delta = cmax - cmin;
+    let h = 0,
+      s = 0,
+      l = 0;
     if (delta === 0) h = 0;
     else if (cmax === r) h = ((g - b) / delta) % 6;
     else if (cmax === g) h = (b - r) / delta + 2;
@@ -67,8 +72,6 @@ const generateGrayShades  = (count) => {
     return `hsl(${h}, ${s}%, ${lightness}%)`;
   });
 };
-
-
 
 const options = [
   "Date (Newest first)",
@@ -152,8 +155,10 @@ const fetchItems = async () => {
 function AdminPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
+  const [reservationsPage, setReservationsPage] = useState(0);
   const { adminDetails, isLoading } = useContext(AdminContext);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [reservationsRowsPerPage, setReservationsRowsPerPage] = useState(10);
   const [allCategories, setAllCategories] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [sortedItems, setSortedItems] = useState([]);
@@ -237,6 +242,18 @@ function AdminPage() {
     return () => clearInterval(messageInterval);
   }, [adminDetails]);
 
+    const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    setRefreshKey(prev => prev + 1); // triggers remount
+  }, [allAdmins]);
+
+  useEffect(() => {
+    if (refreshKey > 0) {
+      navigate(location.pathname, { replace: true });
+    }
+  }, [refreshKey]);
+
   useEffect(() => {
     if (!adminDetails) {
       const timer = setTimeout(() => {
@@ -277,10 +294,17 @@ function AdminPage() {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
+  const handleChangeReservationsPage = (event, newPage) => {
+    setReservationsPage(newPage);
+  };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+  const handleChangeReservationsRowsPerPage = (event) => {
+    setReservationsRowsPerPage(parseInt(event.target.value, 10));
+    setReservationsPage(0);
   };
 
   useEffect(() => {
@@ -360,6 +384,12 @@ function AdminPage() {
     const end = start + rowsPerPage;
     return sortedItems.slice(start, end);
   }, [sortedItems, page, rowsPerPage]);
+
+  const pagedReservations = React.useMemo(() => {
+    const start = reservationsPage * reservationsRowsPerPage;
+    const end = start + reservationsRowsPerPage;
+    return reservations.slice(start, end);
+  }, [reservations, reservationsPage, reservationsRowsPerPage]);
 
   const handleAddItems = async () => {
     // Check if *all* items are still at their default/empty state
@@ -517,24 +547,24 @@ function AdminPage() {
 
   if (!theme) return null;
 
-
-
   const categoryCounts = items?.reduce((acc, item) => {
-  acc[item.category] = (acc[item.category] || 0) + 1;
-  return acc;
-}, {});
+    acc[item.category] = (acc[item.category] || 0) + 1;
+    return acc;
+  }, {});
 
-// 2️⃣ Convert into chart-friendly array
-const dataVal = items ? Object?.entries(categoryCounts).map(([label, value]) => ({
-  label,
-  value,
-})) : [];
+  // 2️⃣ Convert into chart-friendly array
+  const dataVal = items
+    ? Object?.entries(categoryCounts).map(([label, value]) => ({
+        label,
+        value,
+      }))
+    : [];
 
-const total = dataVal.reduce((sum, d) => sum + d.value, 0);
-const valueFormatter = (item) => {
-  const pct = ((item.value / total) * 100).toFixed(1);
-  return `${item.label}: ${item.value} (${pct}%)`;
-};
+  const total = dataVal.reduce((sum, d) => sum + d.value, 0);
+  const valueFormatter = (item) => {
+    const pct = ((item.value / total) * 100).toFixed(1);
+    return `${item.label}: ${item.value} (${pct}%)`;
+  };
 
   const size = {
     width: 400,
@@ -546,9 +576,7 @@ const valueFormatter = (item) => {
     valueFormatter,
   };
 
-
   const grayShades = generateGrayShades(dataVal.length);
-
 
   return (
     <>
@@ -619,7 +647,10 @@ const valueFormatter = (item) => {
             {editItemDetails && (
               <div>
                 {/* item details */}
-                <div className="position-relative rounded-3 mb-3 p-2 d-flex align-items-center flex-column flex-md-row gap-3" style={{border: '1px solid var(--text-light)'}}>
+                <div
+                  className="position-relative rounded-3 mb-3 p-2 d-flex align-items-center flex-column flex-md-row gap-3"
+                  style={{ border: "1px solid var(--text-light)" }}
+                >
                   <img
                     className="object-fit-cover object-position-center p-2"
                     width={250}
@@ -893,7 +924,7 @@ const valueFormatter = (item) => {
               series={[
                 {
                   arcLabel: (item) => `${item.label}: ${item.value}`,
-                  arcLabelMinAngle: 35,
+                  arcLabelMinAngle: 30,
                   arcLabelRadius: "60%",
                   paddingAngle: 0,
                   ...data,
@@ -904,7 +935,7 @@ const valueFormatter = (item) => {
                 [`& .${pieArcLabelClasses.root}`]: {
                   fontWeight: "bold",
                   fill: "white",
-                      stroke: 'none', // ensure no outline
+                  stroke: "none", // ensure no outline
                 },
               }}
               {...size}
@@ -987,9 +1018,9 @@ const valueFormatter = (item) => {
                 </thead>
                 <tbody>
                   {reservations.length > 0 ? (
-                    reservations?.map((item, index) => (
+                    pagedReservations?.map((item, index) => (
                       <tr key={index}>
-                        <th>{index + 1}.</th>
+                        <th>{item.id}.</th>
                         <td>{item.rsv_no}</td>
                         <td>{item.reserved_by}</td>
                         <td>{item.email}</td>
@@ -1011,6 +1042,16 @@ const valueFormatter = (item) => {
                 </tbody>
               </table>
             </div>
+            
+              <TablePagination
+                count={reservations?.length || 0}
+                component="div"
+                page={reservationsPage}
+                onPageChange={handleChangeReservationsPage}
+                rowsPerPage={reservationsRowsPerPage}
+                onRowsPerPageChange={handleChangeReservationsRowsPerPage}
+                sx={{ color: "var(--text-color)" }}
+              />
           </div>
 
           <div
