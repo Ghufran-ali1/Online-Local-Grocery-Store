@@ -2,11 +2,29 @@ import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Password } from "@mui/icons-material";
-import { Avatar, Modal } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Modal,
+} from "@mui/material";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
 import Fade from "@mui/material/Fade";
 import axios from "axios";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "var(--background-light)",
+  borderRadius: 4,
+  p: 2,
+  width: 500,
+};
 
 const editStyle = {
   position: "absolute",
@@ -33,6 +51,8 @@ function AdminView({ admins, setAllAdmins }) {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [oldPasswordError, setOldPasswordError] = useState(false);
+  const [isAdminChanged, setIsAdminChanged] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("theme") || "light";
@@ -130,28 +150,35 @@ function AdminView({ admins, setAllAdmins }) {
     };
   }, []);
 
-
-
   const handleEditItem = async () => {
     const btn = document.getElementById("saveEditAdminBtn");
     const msg = document.getElementById("editAdminSuccess");
+    setPasswordError(false);
+    setOldPasswordError(false);
+    msg.innerText = "";
 
-    if(newPassword !== confirmNewPassword) {
-      setPasswordError(true);
-      return;
-    } else {
-      setPasswordError(false);
-    }
-    if(oldPassword !== editItemOriginalDetails.password) {
-      setOldPasswordError(true);
-      return;
-    } else {
-      setOldPasswordError(false);
-    }
+    if (newPassword.trim() !== "" || confirmNewPassword.trim() !== "") {
+      // If all password fields are empty, consider it as no change
+      if (newPassword !== confirmNewPassword) {
+        setPasswordError(true);
+        return;
+      } else {
+        setPasswordError(false);
+      }
+      if (oldPassword !== editItemOriginalDetails.password) {
+        setOldPasswordError(true);
+        return;
+      } else {
+        setOldPasswordError(false);
+      }
 
-    if(newPassword == oldPassword) {
-      msg.innerText =
-        "❌ New password cannot be the same as old password!";
+      if (newPassword == oldPassword) {
+        msg.innerText = "❌ New password cannot be the same as old password!";
+
+        msg.classList.add("text-danger", "mb-2");
+        msg.classList.remove("text-success");
+        return;
+      }
     }
 
     btn.disabled = true;
@@ -179,6 +206,11 @@ function AdminView({ admins, setAllAdmins }) {
         // Close after 5 seconds
         setTimeout(() => {
           setOpenEdit({ state: false, id: null });
+          setEditItemDetails(null);
+          setEditItemOriginalDetails(null);
+          setOldPassword("");
+          setNewPassword("");
+          setConfirmNewPassword("");
         }, 5000);
       }
     } catch (error) {
@@ -190,12 +222,156 @@ function AdminView({ admins, setAllAdmins }) {
       msg.classList.add("text-danger", "mb-2");
       msg.classList.remove("text-success");
       console.error("Error updating admin:", error);
+
+      btn.innerText = "Try Again ...";
     } finally {
       btn.disabled = false;
-      btn.innerText = "Try Again ...";
+      btn.innerText = "Save Changes";
     }
   };
 
+  useEffect(() => {
+    const isChanged =
+      JSON.stringify(editItemDetails) !==
+        JSON.stringify(editItemOriginalDetails) ||
+      newPassword !== "" ||
+      confirmNewPassword !== "";
+    setIsAdminChanged(isChanged);
+  }, [
+    editItemDetails,
+    editItemOriginalDetails,
+    newPassword,
+    confirmNewPassword,
+  ]);
+
+  const handleDeleteAdmin = (id) => async () => {
+    const btn = document.getElementById("deleteAdminBtn");
+    const msg = document.getElementById("deleteAdminSuccess");
+    btn.disabled = true;
+    btn.innerText = "Deleting ...";
+
+    console.log("Deleting admin with ID:", id);
+
+    try {
+      const { status, data } = await axios.delete(
+        `https://grocery-store-server-theta.vercel.app/api/delete-admin`,
+        {
+          data: { id },
+        }
+      );
+      // Any 2xx is success
+      if (status >= 200 && status < 300) {
+        msg.innerText = "✅ Admin deleted successfully!";
+        msg.classList.add("text-success", "mb-2");
+        msg.classList.remove("text-danger");
+        // Remove admin in parent state
+        setAllAdmins((prevAdmins) =>
+          prevAdmins.filter((admin) => admin.id !== id)
+        );
+        // Close
+        setOpenEdit({ state: false, id: null });
+      }
+    } catch (error) {
+      msg.innerText =
+        "❌ Error deleting admin. Please try again later of contact developer!" +
+        (error?.response?.data?.message
+          ? `(${error.response.data.message})`
+          : "");
+      msg.classList.add("text-danger", "mb-2");
+      msg.classList.remove("text-success");
+      console.error("Error deleting admin:", error);
+
+      btn.innerText = "Try Again ...";
+    } finally {
+      btn.disabled = false;
+      btn.innerText = "Delete Admin";
+    }
+  };
+
+  function ChildModal({ id }) {
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => {
+      setOpen(true);
+    };
+    const handleClose = () => {
+      setOpen(false);
+    };
+
+    return (
+      <React.Fragment>
+        <div className="mb-3">
+          <button
+            type="button"
+            id="deleteAdminBtn"
+            onClick={handleOpen}
+            className="p-1 px-4 me-3 outline-0 rounded-3 small"
+            style={{
+              outline: "none",
+              backgroundColor: "transparent",
+              border: "1px solid red",
+              cursor: "pointer",
+              color: "red",
+            }}
+          >
+            Delete Admin
+          </button>
+        </div>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="child-modal-title"
+          aria-describedby="child-modal-description"
+        >
+          <Box sx={{ ...style }}>
+            <h4 id="child-modal-title" className="text-danger">
+              Delete
+            </h4>
+            <p id="child-modal-description">
+              Are you sure you want to delete this admin? This action cannot be
+              undone and you will not be able to retrieve this account.
+            </p>
+            <div className="mb-3 d-flex gap-2 justify-content-end">
+              <button
+                type="button"
+                id="deleteAdminBtn"
+                onClick={handleClose}
+                className="p-1 px-4 me-3 outline-0 rounded-3 small"
+                style={{
+                  outline: "none",
+                  backgroundColor: "transparent",
+                  border: "1px solid var(--text-light)",
+                  cursor: "pointer",
+                  color: "var(--text-light)",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                id="deleteAdminBtn"
+                onClick={handleDeleteAdmin(id)}
+                className="p-1 px-4 me-3 outline-0 rounded-3 small"
+                style={{
+                  outline: "none",
+                  backgroundColor: "transparent",
+                  border: "1px solid red",
+                  cursor: "pointer",
+                  color: "red",
+                }}
+              >
+                Continue
+              </button>
+            </div>
+
+            <div
+              className="w-100 text-success text-center mb-2 small"
+              id="deleteAdminSuccess"
+            ></div>
+          </Box>
+        </Modal>
+      </React.Fragment>
+    );
+  }
 
   return (
     <>
@@ -210,7 +386,7 @@ function AdminView({ admins, setAllAdmins }) {
         )}
         <div
           ref={containerRef}
-          className="position-relative mt-2 mb-3 d-flex gap-4 overflow-auto justify-content-center"
+          className="position-relative mt-2 mb-3 d-flex gap-4 overflow-auto justify-content-start"
           style={{
             scrollSnapType: "x mandatory",
             scrollbarWidth: "none",
@@ -288,277 +464,309 @@ function AdminView({ admins, setAllAdmins }) {
               className="w-100 editAdminSuccess text-success text-center mb-2"
               id="editAdminSuccess"
             ></div>
-            {editItemDetails && (
-              <div>
-                {/* item details */}
-                <div
-                  className="position-relative rounded-3 mb-3 p-2 py-4 d-flex align-items-center flex-column flex-md-row gap-3"
-                  style={{ border: "1px solid var(--text-light)" }}
-                >
-                  <Avatar
-                    className="mb-2 m-auto border"
-                    alt={editItemDetails.name}
-                    src={editItemDetails.avatar}
-                    style={{ width: "200px", height: "200px" }}
-                  />
-                  <div className="w-100 p-1">
-                    <table
-                      className={`table  adminStoreItemDetails table-sm ${
-                        theme === "dark" ? "table-dark" : ""
-                      }`}
-                    >
-                      <tbody>
-                        <tr>
-                          <th
-                            className="px-3"
-                            scope="row"
-                            style={{ textAlign: "right", width: "20%" }}
-                          >
-                            ID
-                          </th>
-                          <td>{editItemDetails?.id}</td>
-                        </tr>
-                        <tr>
-                          <th
-                            className="px-3"
-                            scope="row"
-                            style={{ textAlign: "right" }}
-                          >
-                            Name
-                          </th>
-                          <td>
-                            <input
-                              style={{
-                                boxShadow: "none",
-                                color: "var(--text-color)",
-                              }}
-                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
-                              type="text"
-                              value={editItemDetails?.username}
-                              onChange={(e) =>
-                                setEditItemDetails({
-                                  ...editItemDetails,
-                                  username: e.target.value,
-                                })
-                              }
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th
-                            className="px-3"
-                            scope="row"
-                            style={{ textAlign: "right" }}
-                          >
-                            Email
-                          </th>
-                          <td>
-                            <input
-                              style={{
-                                boxShadow: "none",
-                                color: "var(--text-color)",
-                              }}
-                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
-                              type="text"
-                              value={editItemDetails?.email}
-                              onChange={(e) =>
-                                setEditItemDetails({
-                                  ...editItemDetails,
-                                  email: e.target.value,
-                                })
-                              }
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th
-                            className="px-3"
-                            scope="row"
-                            style={{ textAlign: "right" }}
-                          >
-                            Role
-                          </th>
-                          <td>
-                            <select
-                              style={{
-                                boxShadow: "none",
-                                color: "var(--text-color)",
-                              }}
-                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
-                              type="text"
-                              value={editItemDetails?.role}
-                              onChange={(e) =>
-                                setEditItemDetails({
-                                  ...editItemDetails,
-                                  role: e.target.value,
-                                })
-                              }
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                // Handle form submission
+                handleEditItem();
+              }}
+            >
+              {editItemDetails && (
+                <div>
+                  {/* item details */}
+                  <div
+                    className="position-relative rounded-3 mb-3 p-2 py-4 d-flex align-items-start flex-column flex-md-row gap-3"
+                    style={{ border: "1px solid var(--text-light)" }}
+                  >
+                    <Avatar
+                      className="mb-2 border"
+                      alt={editItemDetails.name}
+                      src={editItemDetails.avatar}
+                      style={{ width: "200px", height: "200px" }}
+                    />
+                    <div className="w-100 p-1">
+                      <table
+                        className={`table  adminStoreItemDetails table-sm ${
+                          theme === "dark" ? "table-dark" : ""
+                        }`}
+                      >
+                        <tbody>
+                          <tr>
+                            <th
+                              className="px-3"
+                              scope="row"
+                              style={{ textAlign: "right", width: "20%" }}
                             >
-                              <option value={""}>Select Role</option>
-                              <option className="text-black" value="Executive">
-                                Executive
-                              </option>
-                              <option className="text-black" value="Manager">
-                                Manager
-                              </option>
-                              <option className="text-black" value="Staff">
-                                Staff
-                              </option>
-                            </select>
-                          </td>
-                        </tr>
-
-                        <tr>
-                          <th
-                            className="px-3"
-                            scope="row"
-                            style={{ textAlign: "right" }}
-                          >
-                            Old Password
-                          </th>
-                          <td>
-                            <input
-                              style={{
-                                boxShadow: "none",
-                                color: "var(--text-color)",
-                              }}
-                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
-                              type="password"
-                              value={oldPassword}
-                              onChange={(e) => setOldPassword(e.target.value)}
-                            />
-
-                            {oldPasswordError && (
-                              <div
-                                className="w-100 editAdminSuccess px-2 text-danger text-left small mb-2"
-                                id="editAdminSuccess"
+                              ID
+                            </th>
+                            <td>{editItemDetails?.id}</td>
+                          </tr>
+                          <tr>
+                            <th
+                              className="px-3"
+                              scope="row"
+                              style={{ textAlign: "right" }}
+                            >
+                              Name
+                            </th>
+                            <td>
+                              <input
+                                style={{
+                                  boxShadow: "none",
+                                  color: "var(--text-color)",
+                                }}
+                                className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                                type="text"
+                                value={editItemDetails?.username}
+                                onChange={(e) =>
+                                  setEditItemDetails({
+                                    ...editItemDetails,
+                                    username: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <th
+                              className="px-3"
+                              scope="row"
+                              style={{ textAlign: "right" }}
+                            >
+                              Email
+                            </th>
+                            <td>
+                              <input
+                                style={{
+                                  boxShadow: "none",
+                                  color: "var(--text-color)",
+                                }}
+                                className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                                type="text"
+                                value={editItemDetails?.email}
+                                onChange={(e) =>
+                                  setEditItemDetails({
+                                    ...editItemDetails,
+                                    email: e.target.value,
+                                  })
+                                }
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <th
+                              className="px-3"
+                              scope="row"
+                              style={{ textAlign: "right" }}
+                            >
+                              Role
+                            </th>
+                            <td>
+                              <select
+                                style={{
+                                  boxShadow: "none",
+                                  color: "var(--text-color)",
+                                }}
+                                className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                                type="text"
+                                value={editItemDetails?.role}
+                                onChange={(e) =>
+                                  setEditItemDetails({
+                                    ...editItemDetails,
+                                    role: e.target.value,
+                                  })
+                                }
                               >
-                                ❌ You have entered an incorrect password!{" "}
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <th
-                            className="px-3"
-                            scope="row"
-                            style={{ textAlign: "right" }}
-                          >
-                            New Password
-                          </th>
-                          <td>
-                            <input
-                              style={{
-                                boxShadow: "none",
-                                color: "var(--text-color)",
-                              }}
-                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
-                              type="password"
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th
-                            className="px-3"
-                            scope="row"
-                            style={{ textAlign: "right" }}
-                          >
-                            Confirm New Password
-                          </th>
-                          <td>
-                            <input
-                              style={{
-                                boxShadow: "none",
-                                color: "var(--text-color)",
-                              }}
-                              className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
-                              type="password"
-                              value={confirmNewPassword}
-                              onChange={(e) => setConfirmNewPassword(e.target.value)
-                              }
-                            />
+                                <option value={""}>Select Role</option>
+                                <option
+                                  className="text-black"
+                                  value="Executive"
+                                >
+                                  Executive
+                                </option>
+                                <option className="text-black" value="Manager">
+                                  Manager
+                                </option>
+                                <option className="text-black" value="Staff">
+                                  Staff
+                                </option>
+                              </select>
+                            </td>
+                          </tr>
 
-                            {passwordError && (
-                              <div
-                                className="w-100 editAdminSuccess px-2 text-danger text-left small mb-2"
-                                id="editAdminSuccess"
-                              >
-                                ❌ Passwords do not match!{" "}
+                          <tr>
+                            <th
+                              className="px-3"
+                              scope="row"
+                              style={{ textAlign: "right" }}
+                            >
+                              Old Password
+                            </th>
+                            <td>
+                              <input
+                                style={{
+                                  boxShadow: "none",
+                                  color: "var(--text-color)",
+                                }}
+                                className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                                type={showPassword ? "text" : "password"}
+                                value={oldPassword}
+                                onChange={(e) => setOldPassword(e.target.value)}
+                              />
+
+                              {oldPasswordError && (
+                                <div
+                                  className="w-100 editAdminSuccess px-2 text-danger text-left small mb-2"
+                                  id="editAdminSuccess"
+                                >
+                                  ❌ You have entered an incorrect password!{" "}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                          <tr>
+                            <th
+                              className="px-3"
+                              scope="row"
+                              style={{ textAlign: "right" }}
+                            >
+                              New Password
+                            </th>
+                            <td>
+                              <input
+                                style={{
+                                  boxShadow: "none",
+                                  color: "var(--text-color)",
+                                }}
+                                className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                                type={showPassword ? "text" : "password"}
+                                value={newPassword}
+                                placeholder="Not changed"
+                                onChange={(e) => setNewPassword(e.target.value)}
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <th
+                              className="px-3"
+                              scope="row"
+                              style={{ textAlign: "right" }}
+                            >
+                              Confirm New Password
+                            </th>
+                            <td>
+                              <input
+                                style={{
+                                  boxShadow: "none",
+                                  color: "var(--text-color)",
+                                }}
+                                className="form-control bg-transparent p-1 px-2 small m-0 border-black rounded-0 border-bottom w-100 border-0 outline-0"
+                                type={showPassword ? "text" : "password"}
+                                value={confirmNewPassword}
+                                placeholder="Not changed"
+                                onChange={(e) =>
+                                  setConfirmNewPassword(e.target.value)
+                                }
+                              />
+
+                              {passwordError && (
+                                <div
+                                  className="w-100 editAdminSuccess px-2 text-danger text-left small mb-2"
+                                  id="editAdminSuccess"
+                                >
+                                  ❌ Passwords do not match!{" "}
+                                </div>
+                              )}
+                              <div className="px-2 small">
+                                <FormControlLabel
+                                  sx={{
+                                    fontSize: "small",
+                                  }}
+                                  control={
+                                    <Checkbox
+                                      sx={{
+                                        color: "var(--text-color)",
+                                        fontSize: "small",
+                                        "&.Mui-checked": {
+                                          color: "var(--primary-color)",
+                                        },
+                                      }}
+                                      checked={showPassword}
+                                      onChange={() =>
+                                        setShowPassword(!showPassword)
+                                      }
+                                    />
+                                  }
+                                  label="Show Password"
+                                />
                               </div>
-                            )}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* // avatar  */}
+                  <div className="mb-3">
+                    <label className="form-label">Select Avatar</label>
+                    <input
+                      type="file"
+                      className="form-control bg-transparent"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                          setEditItemDetails((prev) => ({
+                            ...prev,
+                            avatar: ev.target.result,
+                          }));
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                  </div>
+
+                  <div className="mb-3">
+                    <p className="fw-semibold text-danger">Delete Admin</p>
+                    <p>
+                      Deleting an admin is a permanent action and cannot be
+                      undone. Please proceed with caution.
+                    </p>
+
+                    <ChildModal id={editItemDetails.id} />
                   </div>
                 </div>
+              )}
 
-                {/* // avatar  */}
-                <div className="mb-3">
-                  <label className="form-label">Select Avatar</label>
-                  <input
-                    type="file"
-                    className="form-control bg-transparent"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      const reader = new FileReader();
-                      reader.onload = (ev) => {
-                        setEditItemDetails((prev) => ({
-                          ...prev,
-                          avatar: ev.target.result,
-                        }));
-                      };
-                      reader.readAsDataURL(file);
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="d-flex justify-content-end">
-              <button
-                id="saveEditAdminBtn"
-                className="p-1 px-4 me-3 outline-0 rounded-3 small"
-                onClick={() => handleEditItem(openEdit?.id)}
-                disabled={
-                  JSON.stringify(editItemDetails) ===
-                  JSON.stringify(editItemOriginalDetails)
-                }
-                style={{
-                  backgroundColor:
-                    JSON.stringify(editItemDetails) ===
-                    JSON.stringify(editItemOriginalDetails)
+              <div className="d-flex justify-content-end">
+                <button
+                  id="saveEditAdminBtn"
+                  className="p-1 px-4 me-3 outline-0 rounded-3 small"
+                  disabled={!isAdminChanged}
+                  style={{
+                    outline: "none",
+                    backgroundColor: !isAdminChanged
                       ? "transparent"
                       : "var(--primary-color)",
-                  border:
-                    JSON.stringify(editItemDetails) ===
-                    JSON.stringify(editItemOriginalDetails)
-                      ? "1 px solid red"
+                    border: !isAdminChanged
+                      ? "1px solid red"
                       : "1px solid var(--primary-color)",
-                  cursor:
-                    JSON.stringify(editItemDetails) ===
-                    JSON.stringify(editItemOriginalDetails)
-                      ? "not-allowed"
-                      : "pointer",
-                  color:
-                    JSON.stringify(editItemDetails) ===
-                    JSON.stringify(editItemOriginalDetails)
-                      ? "red"
-                      : "white",
-                }}
-              >
-                Save Changes
-              </button>
-              <button
-                className="p-1 px-4 border-0 outline-0 bg-dark text-light rounded-3 small"
-                onClick={() => setOpenEdit({ state: false, id: null })}
-              >
-                Cancel
-              </button>
-            </div>
+                    cursor: !isAdminChanged ? "not-allowed" : "pointer",
+                    color: !isAdminChanged ? "red" : "white",
+                  }}
+                >
+                  Save Changes
+                </button>
+                <button
+                  className="p-1 px-4 border-0 outline-0 bg-dark text-light rounded-3 small"
+                  onClick={() => setOpenEdit({ state: false, id: null })}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </Box>
         </Fade>
       </Modal>
