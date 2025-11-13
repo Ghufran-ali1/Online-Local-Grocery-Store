@@ -37,29 +37,28 @@ function Store() {
   const [columnCount, setColumnCount] = useState(4);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
-    const [sortedItems, setSortedItems] = useState([]);
-    const [selectedIndex, setSelectedIndex] = React.useState(0);
-    const openMenu = Boolean(anchorEl);
-    const [search, setSearch] = useState("");
-    const [searching, setSearching] = useState(false);
+  const [sortedItems, setSortedItems] = useState([]);
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const openMenu = Boolean(anchorEl);
+  const [search, setSearch] = useState("");
+  const [searching, setSearching] = useState(false);
 
-    const fetchItems = async () => {
-      const res = await fetch(
-        "https://grocery-store-server-theta.vercel.app/api/items"
-      );
-      if (!res.ok) throw new Error("Failed items fetch");
-      return res.json();
-    };
-  
-    const {
-      data: items,
-      isLoading: itemsLoading,
-      isError: itemsError,
-    } = useQuery({
-      queryKey: ["items"],
-      queryFn: fetchItems,
-    });
+  const fetchItems = async () => {
+    const res = await fetch(
+      "https://grocery-store-server-theta.vercel.app/api/items"
+    );
+    if (!res.ok) throw new Error("Failed items fetch");
+    return res.json();
+  };
 
+  const {
+    data: items,
+    isLoading: itemsLoading,
+    isError: itemsError,
+  } = useQuery({
+    queryKey: ["items"],
+    queryFn: fetchItems,
+  });
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -93,7 +92,7 @@ function Store() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-    const handleClickListItem = (event) => {
+  const handleClickListItem = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -108,12 +107,11 @@ function Store() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  
   const handleMenuItemClick = (event, index) => {
     setSelectedIndex(index);
     setAnchorEl(null);
   };
-  
+
   // Sort and slice items for current page
 
   useEffect(() => {
@@ -175,29 +173,28 @@ function Store() {
     return sortedItems.slice(start, end);
   }, [sortedItems, page, rowsPerPage]);
 
+  // Search functionality
+  useEffect(() => {
+    setSearching(true);
 
-    // Search functionality
-    useEffect(() => {
-      setSearching(true);
-  
-      if (search.trim() !== "" && items) {
-        // Filter category items based on search query
-        const searchResults = items.filter(
-          (item) =>
-            item.name.toLowerCase().includes(search.toLowerCase()) ||
-            item.category.toLowerCase().includes(search.toLowerCase()) ||
-            item.description.toLowerCase().includes(search.toLowerCase()) ||
-            item.store_no.toLowerCase().includes(search.toLowerCase())
-        );
-        setTimeout(() => {
-          setSearching(false);
-          setSortedItems(searchResults);
-        }, 1000);
-      } else {
+    if (search.trim() !== "" && items) {
+      // Filter category items based on search query
+      const searchResults = items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()) ||
+          item.category.toLowerCase().includes(search.toLowerCase()) ||
+          item.description.toLowerCase().includes(search.toLowerCase()) ||
+          item.store_no.toLowerCase().includes(search.toLowerCase())
+      );
+      setTimeout(() => {
         setSearching(false);
-        setSortedItems(items || []);
-      }
-    }, [search]);
+        setSortedItems(searchResults);
+      }, 1000);
+    } else {
+      setSearching(false);
+      setSortedItems(items || []);
+    }
+  }, [search]);
   return (
     <>
       <AppBreadcrumbs />
@@ -243,41 +240,41 @@ function Store() {
           >
             <div className="d-flex mb-3 justify-content-between gap-4 align-items-center">
               <h3 className="fw-bold">Store</h3>
-              
-                            <div
-                              className="flex-fill rounded-pill"
-                              style={{
-                                backgroundColor: "var(--background-color)",
-                              }}
-                            >
-                              <TextField
-                                autoFocus={true}
-                                focused
-                                id="search"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                type="text"
-                                placeholder="Search for products ..."
-                                className="p-4 py-1 border-0 outline-0 rounded-3 m-0 d-sm-none d-md-block"
-                                fullWidth
-                                variant="standard"
-                                color="primary"
-                                InputProps={{
-                                  disableUnderline: true,
-                                  sx: {
-                                    color: "var(--text-color)", // input text
-                                    "&::placeholder": {
-                                      color: "var(--text-light)",
-                                      opacity: 1, // full opacity
-                                    },
-                                    "& .MuiInputBase-input::placeholder": {
-                                      color: "var(--text-light)",
-                                      opacity: 1,
-                                    },
-                                  },
-                                }}
-                              />
-                            </div>
+
+              <div
+                className="flex-fill rounded-pill"
+                style={{
+                  backgroundColor: "var(--background-color)",
+                }}
+              >
+                <TextField
+                  autoFocus={false}
+                  focused
+                  id="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  type="text"
+                  placeholder="Search for products ..."
+                  className="p-4 py-1 border-0 outline-0 rounded-3 m-0 d-sm-none d-md-block"
+                  fullWidth
+                  variant="standard"
+                  color="primary"
+                  InputProps={{
+                    disableUnderline: true,
+                    sx: {
+                      color: "var(--text-color)", // input text
+                      "&::placeholder": {
+                        color: "var(--text-light)",
+                        opacity: 1, // full opacity
+                      },
+                      "& .MuiInputBase-input::placeholder": {
+                        color: "var(--text-light)",
+                        opacity: 1,
+                      },
+                    },
+                  }}
+                />
+              </div>
               <div className="d-flex gap-2 align-items-center">
                 <GridViewIcon
                   role="button"
@@ -341,10 +338,9 @@ function Store() {
                 </Menu>
               </div>
             </div>
-            
 
             <div className="text-center py-4 text-muted mb-3">
-              {items?.length || 0} items found in {'store'}
+              {items?.length || 0} items found in {"store"}
             </div>
 
             {!itemsLoading ? (

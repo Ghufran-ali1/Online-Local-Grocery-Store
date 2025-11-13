@@ -297,7 +297,7 @@ function Category() {
                 }}
               >
                 <TextField
-                  autoFocus={true}
+                  autoFocus={false}
                   focused
                   id="search"
                   value={search}
