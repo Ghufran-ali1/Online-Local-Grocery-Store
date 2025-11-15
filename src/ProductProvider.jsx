@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { ProductContext } from './context/ProductContext';
+import React, { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { ProductContext } from "./context/ProductContext";
 
 export default function ProductProvider({ children }) {
   const { itemStockNo } = useParams();

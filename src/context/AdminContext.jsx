@@ -15,7 +15,13 @@ export const AdminAuthProvider = ({ children }) => {
     try {
       const response = await fetch(
         `https://grocery-store-server-theta.vercel.app/api/admin-details`,
-        { method: "GET", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       if (!response.ok) {
         if (response.status === 401) {
@@ -42,7 +48,9 @@ export const AdminAuthProvider = ({ children }) => {
     const initializeAdmin = async () => {
       const token = localStorage.getItem("admin_auth_token");
 
-      if (isMounted) { await fetchAdminDetails(token); }
+      if (isMounted) {
+        await fetchAdminDetails(token);
+      }
     };
 
     initializeAdmin();

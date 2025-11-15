@@ -38,7 +38,9 @@ function AdminSignupPage() {
         }
       );
 
-      setMessage("Admin Created successful! Admin can now use these details to log in.");
+      setMessage(
+        "Admin Created successful! Admin can now use these details to log in."
+      );
       setFormData({
         username: "",
         email: "",

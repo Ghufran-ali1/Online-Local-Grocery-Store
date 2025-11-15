@@ -30,7 +30,6 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
     window.dispatchEvent(new Event("watchlist-updated"));
   };
 
-
   if (!ProductDetails) {
     return;
   }
@@ -54,7 +53,7 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
           >
             In stock
           </button>
-        ) : (          
+        ) : (
           <button
             className="small p-1 px-2 border-0 outline-0 rounded-2"
             style={{ backgroundColor: "red", color: "white" }}
@@ -94,10 +93,23 @@ function ProductItem({ ProductDetails = null, display = "grid" }) {
             <div className="fw-semibold m-0 p-0 fs-6 singleLineClamp">
               {ProductDetails?.name}
             </div>
-            <small className="singleLineClamp mb-1 mt-2" style={{ color: "var(text-light)", fontSize: '.65rem' }}>
-              {ProductDetails?.views} views | <span style={{ color: ProductDetails?.quantity < 10 ? 'red' : 'inherit' }}>{ProductDetails?.quantity} remaining in stock</span>
+            <small
+              className="singleLineClamp mb-1 mt-2"
+              style={{ color: "var(text-light)", fontSize: ".65rem" }}
+            >
+              {ProductDetails?.views} views |{" "}
+              <span
+                style={{
+                  color: ProductDetails?.quantity < 10 ? "red" : "inherit",
+                }}
+              >
+                {ProductDetails?.quantity} remaining in stock
+              </span>
             </small>
-            <small className="singleLineClamp" style={{ color: "var(--text-light)" }}>
+            <small
+              className="singleLineClamp"
+              style={{ color: "var(--text-light)" }}
+            >
               {ProductDetails?.description}
             </small>
           </div>

@@ -8,7 +8,7 @@ export default function Layout() {
     <>
       <Header />
       <main className="flex-grow-1">
-        <Outlet /> 
+        <Outlet />
       </main>
       <Footer />
     </>

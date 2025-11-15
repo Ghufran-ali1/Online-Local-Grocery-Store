@@ -31,25 +31,23 @@ function Product() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const fetchItems = async () => {
+    const res = await fetch(
+      "https://grocery-store-server-theta.vercel.app/api/items"
+    );
+    if (!res.ok) throw new Error("Failed items fetch");
+    return res.json();
+  };
 
-
-    const fetchItems = async () => {
-      const res = await fetch(
-        "https://grocery-store-server-theta.vercel.app/api/items"
-      );
-      if (!res.ok) throw new Error("Failed items fetch");
-      return res.json();
-    };
-  
-    const {
-      data: items,
-      isLoading: itemsLoading,
-      isError: itemsError,
-    } = useQuery({
-      queryKey: ["items"],
-      queryFn: fetchItems,
-    });
-      const stored = localStorage.getItem("watchlist");
+  const {
+    data: items,
+    isLoading: itemsLoading,
+    isError: itemsError,
+  } = useQuery({
+    queryKey: ["items"],
+    queryFn: fetchItems,
+  });
+  const stored = localStorage.getItem("watchlist");
   const currentWatchList = stored ? JSON.parse(stored) : [];
   const [watchlistIdentifiers, setWatchlistIdentifiers] =
     useState(currentWatchList);
@@ -60,7 +58,6 @@ function Product() {
     date: new Date().toISOString().split("T")[0],
     quantity: 5,
   });
-
 
   // Fetch product details
   useEffect(() => {
@@ -384,7 +381,10 @@ function Product() {
             </Fade>
           </Modal>
 
-          <div className="container m-auto d-flex gap-4 rounded-3 p-2 mb-3 flex-column flex-md-row" style={{border: "1px solid var(--text-light)"}}>
+          <div
+            className="container m-auto d-flex gap-4 rounded-3 p-2 mb-3 flex-column flex-md-row"
+            style={{ border: "1px solid var(--text-light)" }}
+          >
             <div className="w-100 p-2">
               <img
                 className="img-fluid w-100 p-2"
@@ -492,7 +492,8 @@ function Product() {
                     </span>
                   ) : productDetails?.quantity == 0 ? (
                     <span className="d-flex gap-2 align-items-center">
-                      <i className="bi bi-info-circle"></i> Item is out of stock. Please contact the store to make a special request!
+                      <i className="bi bi-info-circle"></i> Item is out of
+                      stock. Please contact the store to make a special request!
                     </span>
                   ) : (
                     <span className="d-flex gap-2 align-items-center">
@@ -569,7 +570,11 @@ function Product() {
                 Similar Items from {productDetails.category}
               </h4>
               <hr className="container mb-4" />
-                <ProductPicks loading={itemsLoading} items={items} Similar={productDetails.category} />
+              <ProductPicks
+                loading={itemsLoading}
+                items={items}
+                Similar={productDetails.category}
+              />
             </>
           )}
         </ProductContext.Provider>

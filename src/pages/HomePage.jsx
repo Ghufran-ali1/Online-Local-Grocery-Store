@@ -66,7 +66,7 @@ function HomePage() {
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "right center",
-            minHeight: "95vh",
+            minHeight: "85vh",
           }}
         >
           <div className="container px-4 m-auto rounded-0">
